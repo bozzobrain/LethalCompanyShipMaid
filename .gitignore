@@ -1,0 +1,9 @@
+/.idea/
+/.vs/
+packages
+Releases
+**/bin
+**/obj
+**/GameDirectory.targets
+ShipMaid.sln.DotSettings.user
+ShipMaid.csproj.user
