@@ -19,3 +19,6 @@ A mod where the ship and the storage closet is cleaned up when you scan within t
 
 # Feedback
 - This mod was thrown together very quickly. Feel free to leave feedback
+
+# Buy me a coffee
+[Buy me a coffee](https://www.buymeacoffee.com/bozzobrain)
