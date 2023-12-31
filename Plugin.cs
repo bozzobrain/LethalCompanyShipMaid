@@ -13,7 +13,7 @@ namespace ShipMaid
 	{
 		private const string GUID = "ShipMaid";
 		private const string NAME = "ShipMaid";
-		private const string VERSION = "1.0.0";
+		private const string VERSION = "1.0.1";
 
 		internal static ManualLogSource Log;
 		private void Awake()

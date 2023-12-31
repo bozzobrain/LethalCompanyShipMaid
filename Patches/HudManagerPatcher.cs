@@ -29,29 +29,58 @@ namespace ShipMaid.Patches
 			// Only allow this special scan to work while inside the ship.
 			if (!StartOfRound.Instance.inShipPhase && !GameNetworkManager.Instance.localPlayerController.isInHangarShipRoom)
 				return;
-			
-			//ReportScrapList("closet");
 
-			OrganizeStorageCloset(); 
+			OrganizeStorageCloset();
 			OrganizeShipLoot();
 		}
 
-	
-
 		/// <summary>
-		/// Calculate the value of all scrap in the ship.
+		/// Get position of the ship.
 		/// </summary>
-		/// <returns>The total scrap value.</returns>
-		private static float CalculateLootValue()
+		/// <returns>Vector3 position of ship.</returns>
+		private static Vector3 GetShipLocation()
 		{
 			GameObject ship = GameObject.Find("/Environment/HangarShip");
+			return ship.transform.position;
+		}
+
+		/// <summary>
+		/// Get position inside of the ship for object placement.
+		/// </summary>
+		/// <returns>Vector3 position of ship to place objects.</returns>
+		private static Vector3 GetShipCenterLocation()
+		{
+			GameObject ship = GameObject.Find("/Environment/HangarShip");
+			Vector3 shiplocation = ship.transform.position;
+			shiplocation.z += -5.75f;
+			shiplocation.x += -4.85f;
+			shiplocation.y += 1.66f;
+			return shiplocation;
+		}
+
+		/// <summary>
+		/// Get a value of x offset for a given scrap. Higher values have higher x offsets.
+		/// Scale the values by 3 units to group them but order by value
+		/// </summary>
+		/// <returns>Offset x value scaled by scrap value.</returns>
+		private static float GetXOffsetFromScrapValue(GrabbableObject obj)
+		{
+			return ((obj.scrapValue - 10) / 200f) * 5;
+		}
+
+
+		/// <summary>
+		/// Get a list of all scrap in the storage closet.
+		/// </summary>
+		/// <returns>List of all scrap in storage closet.</returns>
+		private static List<GrabbableObject> GetObjectsInStorageCloset()
+		{
+			GameObject storageCloset = GameObject.Find("/Environment/HangarShip/StorageCloset");
 			// Get all objects that can be picked up from inside the ship. Also remove items which technically have
 			// scrap value but don't actually add to your quota.
-			var loot = ship.GetComponentsInChildren<GrabbableObject>()
+			var loot = storageCloset.GetComponentsInChildren<GrabbableObject>()
 				.Where(obj => obj.name != "ClipboardManual" && obj.name != "StickyNoteItem").ToList();
-			ShipMaid.Log.LogDebug("Calculating total ship scrap value.");
-			loot.Do(scrap => ShipMaid.Log.LogDebug($"{scrap.name} - ${scrap.scrapValue}"));
-			return loot.Sum(scrap => scrap.scrapValue);
+			return loot;
 		}
 
 		/// <summary>
@@ -84,21 +113,17 @@ namespace ShipMaid.Patches
 				var closetObjects = GetObjectsInStorageCloset();
 				closetObjects.Do(scrap => ShipMaid.Log.LogInfo($"{scrap.name} - ${scrap.scrapValue} - ${scrap.targetFloorPosition.x}- ${scrap.targetFloorPosition.y}- ${scrap.targetFloorPosition.z}"));
 			}
-
 		}
 
-		/// <summary>
-		/// Get a list of all scrap in the storage closet.
-		/// </summary>
-		/// <returns>List of all scrap in storage closet.</returns>
-		private static List<GrabbableObject> GetObjectsInStorageCloset()
+		private static bool NearLocation(float f1, float f2, float offset)
 		{
-			GameObject storageCloset = GameObject.Find("/Environment/HangarShip/StorageCloset");
-			// Get all objects that can be picked up from inside the ship. Also remove items which technically have
-			// scrap value but don't actually add to your quota.
-			var loot = storageCloset.GetComponentsInChildren<GrabbableObject>()
-				.Where(obj => obj.name != "ClipboardManual" && obj.name != "StickyNoteItem").ToList();
-			return loot;
+			return f1 < f2 + offset && f1 > f2 - offset;
+			
+		}
+
+		private static bool SameLocation(Vector3 pos1, Vector3 pos2)
+		{
+			return NearLocation(pos1.x,pos2.x,0.01f) && NearLocation(pos1.z, pos2.z, 0.01f);
 		}
 
 		/// <summary>
@@ -117,27 +142,26 @@ namespace ShipMaid.Patches
 					objectNames.Add(scrap.name);
 				}
 			}
-
 			foreach (var objectType in objectNames)
-			{				
+			{
 				var objectsOfType = storageClosetObjects.Where(obj => obj.name.Contains(objectType)).ToList();
 
 				// Make sure this item is not being held currently
-				var firstObjectOfType = objectsOfType.FirstOrDefault(obj=>!obj.isHeld);			
+				var firstObjectOfType = objectsOfType.FirstOrDefault(obj => !obj.isHeld);
 
 				if (firstObjectOfType != null)
-				{					
+				{
 					var placementPosition = firstObjectOfType.transform.position;
 					var placementRotation = firstObjectOfType.transform.rotation;
 					foreach (var obj in objectsOfType)
 					{
 						// Make sure we dont move a held object
 						if (obj.isHeld)
-							continue;						
+							continue;
 
 						ShipMaid.Log.LogInfo($"Moving object - {obj.name} - From: {obj.transform.position.x},{obj.transform.position.y},{obj.transform.position.z} to {placementPosition.x},{placementPosition.y},{placementPosition.z}");
 						obj.gameObject.transform.SetPositionAndRotation(placementPosition, placementRotation);
-						
+
 
 						obj.hasHitGround = false;
 						obj.startFallingPosition = obj.transform.position;
@@ -163,17 +187,48 @@ namespace ShipMaid.Patches
 			var storageClosetObjects = GetObjectsInStorageCloset();
 
 			// Do not adjust the storage closet objects
-			foreach(var storageClosetObject in storageClosetObjects)
+			foreach (var storageClosetObject in storageClosetObjects)
 			{
-				if(shipObjects.Contains(storageClosetObject))
+				if (shipObjects.Contains(storageClosetObject))
 				{
 					shipObjects.Remove(storageClosetObject);
 				}
 			}
 
+
+			// Sort objects by two handed and one handed
+			List<GrabbableObject> twoHandedObjects = new List<GrabbableObject>();
+			List<GrabbableObject> oneHandedObjects = new List<GrabbableObject>();
+			foreach (var scrap in shipObjects)
+			{
+				if (scrap.itemProperties.twoHanded)
+				{
+					twoHandedObjects.Add(scrap);
+				}
+				else
+				{
+					oneHandedObjects.Add(scrap);
+				}
+			}
+			OrganizeItems(oneHandedObjects, false);
+			OrganizeItems(twoHandedObjects, true);
+
+		}
+
+
+		private static void OrganizeItems(List<GrabbableObject> objects, bool twoHanded)
+		{
+			// Organize two handed object in a different location than single handed
+			// Single handed objects are closer to the door
+			var twoHandedOffset = 0;
+			if (twoHanded)
+			{
+				twoHandedOffset = 4;
+			}
+
 			// Get all object types and make a list of them
 			List<string> objectNames = new List<string>();
-			foreach (var scrap in shipObjects)
+			foreach (var scrap in objects)
 			{
 				if (!objectNames.Contains(scrap.name))
 				{
@@ -181,40 +236,70 @@ namespace ShipMaid.Patches
 				}
 			}
 
+			// calculate a z offset that places objects on different z location by type
+			float objectTypeZOffset = 3f / objectNames.Count;
+			if (twoHanded)
+			{
+				objectTypeZOffset = 4.5f / objectNames.Count;
+			}
+			int itemCounter = 0;
+
 			// Organize items by the name of the object (like objects together)
 			foreach (var objectType in objectNames)
 			{
-				var objectsOfType = shipObjects.Where(obj => obj.name.Contains(objectType)).ToList();
+				var objectsOfType = objects.Where(obj => obj.name.Contains(objectType)).ToList();
 
 				// Make sure this item is not being held currently
 				var firstObjectOfType = objectsOfType.FirstOrDefault(obj => !obj.isHeld);
 
+				// Keep track of offset locations to disuade locations that identical (same scrap value)
+				List<float> offsetLocations = new List<float>();
+
+				// Make sure first object is not null in type
 				if (firstObjectOfType != null)
 				{
-					var placementPosition = firstObjectOfType.transform.position;
+					// Find placement location adjust z by small amount for each type of object
+					var placementPosition = GetShipCenterLocation();
+					placementPosition.z -= objectTypeZOffset * itemCounter;
+
+					// Two handed objects can be moved closer to the wall
+					if (twoHanded)
+						placementPosition.z += 1f;
+
 					foreach (var obj in objectsOfType)
 					{
 						// Make sure we dont move a held object
 						if (obj.isHeld)
 							continue;
 
-						ShipMaid.Log.LogInfo($"Moving object - {obj.name} - From: {obj.transform.position.x},{obj.transform.position.y},{obj.transform.position.z} to {placementPosition.x},{placementPosition.y},{placementPosition.z}");
-						obj.gameObject.transform.SetPositionAndRotation(placementPosition, obj.transform.rotation);
+						// Shift item position by scrap value (higher value is closer to door)
+						placementPosition.x = GetShipCenterLocation().x + GetXOffsetFromScrapValue(obj) + twoHandedOffset;
 
-
-						obj.hasHitGround = false;
-						obj.startFallingPosition = obj.transform.position;
-						if (obj.transform.parent != null)
+						// If we already placed an item here, move it by a small amount to offset common values
+						while(offsetLocations.Contains(placementPosition.x ))
 						{
-							obj.startFallingPosition = obj.transform.parent.InverseTransformPoint(obj.startFallingPosition);
+							placementPosition.x += 0.1f;
 						}
-						obj.FallToGround(false);
+						offsetLocations.Add(placementPosition.x);
 
-						//placementPosition.x += 0.01f;
+						// Move the object if position needs adjusted
+						if (!SameLocation(obj.transform.position, placementPosition))
+						{
+							ShipMaid.Log.LogInfo($"Moving object - {obj.name} - From: {obj.transform.position.x},{obj.transform.position.y},{obj.transform.position.z} to {placementPosition.x},{placementPosition.y},{placementPosition.z}");
+							obj.gameObject.transform.SetPositionAndRotation(placementPosition, obj.transform.rotation);
+
+							obj.hasHitGround = false;
+							obj.startFallingPosition = obj.transform.position;
+							if (obj.transform.parent != null)
+							{
+								obj.startFallingPosition = obj.transform.parent.InverseTransformPoint(obj.startFallingPosition);
+							}
+							obj.FallToGround(false);
+						}
 					}
+					itemCounter++;
 				}
 			}
-		}	
+		}
 	}
-
 }
