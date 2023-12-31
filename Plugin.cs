@@ -13,18 +13,25 @@ namespace ShipMaid
 	{
 		private const string GUID = "ShipMaid";
 		private const string NAME = "ShipMaid";
-		private const string VERSION = "1.0.1";
+		private const string VERSION = "1.1.0";
 
-		internal static ManualLogSource Log;
+		public static ShipMaid instance;
 		private void Awake()
 		{
-			Log = Logger;
+			instance = this;
+			ConfigSettings.BindConfigSettings();
+
 			// Plugin startup logic
-			Log.LogInfo($"Plugin {GUID} is loaded!");
+			Logger.LogInfo($"Plugin {GUID} is loaded!");
 
 			Harmony harmony = new Harmony(GUID);
 			harmony.PatchAll(Assembly.GetExecutingAssembly());
 
+
+		}
+		public static void Log(string message)
+		{
+			instance.Logger.LogInfo((object)message);
 		}
 	}
 }

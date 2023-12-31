@@ -10,30 +10,12 @@ using UnityEngine.InputSystem;
 using UnityEngine.UIElements;
 using Object = UnityEngine.Object;
 
-namespace ShipMaid.Patches
+namespace ShipMaid
 {
 
 	[HarmonyPatch]
-	internal class HudManagerPatcher
+	internal class ShipMaidFunctions
 	{
-		[HarmonyPrefix]
-		[HarmonyPatch(typeof(HUDManager), nameof(HUDManager.PingScan_performed))]
-		private static void OnScan(HUDManager __instance, InputAction.CallbackContext context)
-		{
-			ShipMaid.Log.LogDebug("On scan.");
-
-			if (GameNetworkManager.Instance.localPlayerController == null)
-				return;
-			if (!context.performed || !__instance.CanPlayerScan() || __instance.playerPingingScan > -0.5f)
-				return;
-			// Only allow this special scan to work while inside the ship.
-			if (!StartOfRound.Instance.inShipPhase && !GameNetworkManager.Instance.localPlayerController.isInHangarShipRoom)
-				return;
-
-			OrganizeStorageCloset();
-			OrganizeShipLoot();
-		}
-
 		/// <summary>
 		/// Get position of the ship.
 		/// </summary>
@@ -106,31 +88,31 @@ namespace ShipMaid.Patches
 			if (where == "ship")
 			{
 				var shipObjects = ObjectsInShip();
-				shipObjects.Do(scrap => ShipMaid.Log.LogInfo($"{scrap.name} - ${scrap.scrapValue} - ${scrap.targetFloorPosition.x}- ${scrap.targetFloorPosition.y}- ${scrap.targetFloorPosition.z}"));
+				shipObjects.Do(scrap => ShipMaid.Log($"{scrap.name} - ${scrap.scrapValue} - ${scrap.targetFloorPosition.x}- ${scrap.targetFloorPosition.y}- ${scrap.targetFloorPosition.z}"));
 			}
 			else if (where == "closet")
 			{
 				var closetObjects = GetObjectsInStorageCloset();
-				closetObjects.Do(scrap => ShipMaid.Log.LogInfo($"{scrap.name} - ${scrap.scrapValue} - ${scrap.targetFloorPosition.x}- ${scrap.targetFloorPosition.y}- ${scrap.targetFloorPosition.z}"));
+				closetObjects.Do(scrap => ShipMaid.Log($"{scrap.name} - ${scrap.scrapValue} - ${scrap.targetFloorPosition.x}- ${scrap.targetFloorPosition.y}- ${scrap.targetFloorPosition.z}"));
 			}
 		}
 
 		private static bool NearLocation(float f1, float f2, float offset)
 		{
 			return f1 < f2 + offset && f1 > f2 - offset;
-			
+
 		}
 
 		private static bool SameLocation(Vector3 pos1, Vector3 pos2)
 		{
-			return NearLocation(pos1.x,pos2.x,0.01f) && NearLocation(pos1.z, pos2.z, 0.01f);
+			return NearLocation(pos1.x, pos2.x, 0.01f) && NearLocation(pos1.z, pos2.z, 0.01f);
 		}
 
 		/// <summary>
 		/// Organizes the scrap in the storage closet.
 		/// </summary>
 		/// 
-		private static void OrganizeStorageCloset()
+		public static void OrganizeStorageCloset()
 		{
 			GameObject storageCloset = GameObject.Find("/Environment/HangarShip/StorageCloset");
 			var storageClosetObjects = GetObjectsInStorageCloset();
@@ -159,7 +141,7 @@ namespace ShipMaid.Patches
 						if (obj.isHeld)
 							continue;
 
-						ShipMaid.Log.LogInfo($"Moving object - {obj.name} - From: {obj.transform.position.x},{obj.transform.position.y},{obj.transform.position.z} to {placementPosition.x},{placementPosition.y},{placementPosition.z}");
+						ShipMaid.Log($"Moving object - {obj.name} - From: {obj.transform.position.x},{obj.transform.position.y},{obj.transform.position.z} to {placementPosition.x},{placementPosition.y},{placementPosition.z}");
 						obj.gameObject.transform.SetPositionAndRotation(placementPosition, placementRotation);
 
 
@@ -181,7 +163,7 @@ namespace ShipMaid.Patches
 		/// Organizes the scrap in the ship.
 		/// </summary>
 		/// 
-		private static void OrganizeShipLoot()
+		public static void OrganizeShipLoot()
 		{
 			var shipObjects = ObjectsInShip();
 			var storageClosetObjects = GetObjectsInStorageCloset();
@@ -276,7 +258,7 @@ namespace ShipMaid.Patches
 						placementPosition.x = GetShipCenterLocation().x + GetXOffsetFromScrapValue(obj) + twoHandedOffset;
 
 						// If we already placed an item here, move it by a small amount to offset common values
-						while(offsetLocations.Contains(placementPosition.x ))
+						while (offsetLocations.Contains(placementPosition.x))
 						{
 							placementPosition.x += 0.1f;
 						}
@@ -285,7 +267,7 @@ namespace ShipMaid.Patches
 						// Move the object if position needs adjusted
 						if (!SameLocation(obj.transform.position, placementPosition))
 						{
-							ShipMaid.Log.LogInfo($"Moving object - {obj.name} - From: {obj.transform.position.x},{obj.transform.position.y},{obj.transform.position.z} to {placementPosition.x},{placementPosition.y},{placementPosition.z}");
+							ShipMaid.Log($"Moving object - {obj.name} - From: {obj.transform.position.x},{obj.transform.position.y},{obj.transform.position.z} to {placementPosition.x},{placementPosition.y},{placementPosition.z}");
 							obj.gameObject.transform.SetPositionAndRotation(placementPosition, obj.transform.rotation);
 
 							obj.hasHitGround = false;
