@@ -3,10 +3,14 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using GameNetcodeStuff;
 using HarmonyLib;
 using TMPro;
+using Unity.Netcode;
+using Unity.Netcode.Components;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
 using Object = UnityEngine.Object;
 
@@ -16,6 +20,16 @@ namespace ShipMaid
 	[HarmonyPatch]
 	internal class ShipMaidFunctions
 	{
+
+		public static PlayerControllerB localPlayerController;
+
+		[HarmonyPatch(typeof(PlayerControllerB), "ConnectClientToPlayerObject")]
+		[HarmonyPostfix]
+		public static void OnLocalPlayerConnect(PlayerControllerB __instance)
+		{
+			localPlayerController = __instance;
+		}
+		
 		/// <summary>
 		/// Get position of the ship.
 		/// </summary>
@@ -34,9 +48,9 @@ namespace ShipMaid
 		{
 			GameObject ship = GameObject.Find("/Environment/HangarShip");
 			Vector3 shiplocation = ship.transform.position;
-			shiplocation.z += -5.75f;
-			shiplocation.x += -4.85f;
-			shiplocation.y += 1.66f;
+			shiplocation.z += 1.5f;
+			shiplocation.x += -5f;
+			shiplocation.y += .05f;
 			return shiplocation;
 		}
 
@@ -197,6 +211,14 @@ namespace ShipMaid
 
 		}
 
+		public static void NetworkTransformed(GrabbableObject obj, Vector3 placementPosition)
+		{
+			var weightBefore = localPlayerController.carryWeight;
+			GameObject ship = GameObject.Find("/Environment/HangarShip");
+			localPlayerController.PlaceGrabbableObject(ship.transform, placementPosition, false, obj);
+			localPlayerController.PlaceObjectServerRpc(obj.gameObject.GetComponent<NetworkObject>(), ship.GetComponent<NetworkObject>(), placementPosition, false);
+			localPlayerController.carryWeight = weightBefore;
+		}
 
 		private static void OrganizeItems(List<GrabbableObject> objects, bool twoHanded)
 		{
@@ -219,10 +241,10 @@ namespace ShipMaid
 			}
 
 			// calculate a z offset that places objects on different z location by type
-			float objectTypeZOffset = 3f / objectNames.Count;
+			float objectTypeZOffset = 2.75f / objectNames.Count;
 			if (twoHanded)
 			{
-				objectTypeZOffset = 4.5f / objectNames.Count;
+				objectTypeZOffset = 3.5f / objectNames.Count;
 			}
 			int itemCounter = 0;
 
@@ -246,7 +268,7 @@ namespace ShipMaid
 
 					// Two handed objects can be moved closer to the wall
 					if (twoHanded)
-						placementPosition.z += 1f;
+						placementPosition.z += 0.5f;
 
 					foreach (var obj in objectsOfType)
 					{
@@ -267,16 +289,16 @@ namespace ShipMaid
 						// Move the object if position needs adjusted
 						if (!SameLocation(obj.transform.position, placementPosition))
 						{
-							ShipMaid.Log($"Moving object - {obj.name} - From: {obj.transform.position.x},{obj.transform.position.y},{obj.transform.position.z} to {placementPosition.x},{placementPosition.y},{placementPosition.z}");
-							obj.gameObject.transform.SetPositionAndRotation(placementPosition, obj.transform.rotation);
-
-							obj.hasHitGround = false;
-							obj.startFallingPosition = obj.transform.position;
-							if (obj.transform.parent != null)
-							{
-								obj.startFallingPosition = obj.transform.parent.InverseTransformPoint(obj.startFallingPosition);
-							}
-							obj.FallToGround(false);
+							//ShipMaid.Log($"Moving object - {obj.name} - From: {obj.transform.position.x},{obj.transform.position.y},{obj.transform.position.z} to {placementPosition.x},{placementPosition.y},{placementPosition.z}");
+							//obj.gameObject.transform.SetPositionAndRotation(placementPosition, obj.transform.rotation);
+							NetworkTransformed(obj,placementPosition);
+							//obj.hasHitGround = false;
+							//obj.startFallingPosition = obj.transform.position;
+							//if (obj.transform.parent != null)
+							//{
+							//	obj.startFallingPosition = obj.transform.parent.InverseTransformPoint(obj.startFallingPosition);
+							//}
+							//obj.FallToGround(false);
 						}
 					}
 					itemCounter++;

@@ -12,9 +12,12 @@ A mod where the ship and the storage closet is cleaned up when you ~~scan~~ pres
  - Keybindings can be modified in the cfg file
 
 # Changes
-- The main control of the mod is now through keybinds.
-- Pressing 'm' will organize ship objects
-- Pressing 'n' will organize the ship's closet
+- V2.0.0
+  - Made the system network compatible (definitely buggy)
+- V1.1.0
+  - The main control of the mod is now through keybinds.
+  - Pressing 'm' will organize ship objects
+  - Pressing 'n' will organize the ship's closet
 
 # Installation
 1. Install BepInEx
