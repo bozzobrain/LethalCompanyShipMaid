@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
+using Discord;
 using GameNetcodeStuff;
 using HarmonyLib;
+using ShipMaid.Patchers;
 using TMPro;
 using Unity.Netcode;
 using Unity.Netcode.Components;
@@ -12,15 +15,97 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
+using static UnityEngine.GraphicsBuffer;
+using NetworkManager = Unity.Netcode.NetworkManager;
 using Object = UnityEngine.Object;
 
 namespace ShipMaid
 {
 
+	public class NetworkingObjectManager : NetworkBehaviour
+	{
+		[ServerRpc]
+		public void MakeObjectFallServerRpc(NetworkObjectReference obj, Vector3 placementPosition)
+		{
+			NetworkManager networkManager = base.NetworkManager;
+			if ((object)networkManager == null || !networkManager.IsListening)
+			{
+				return;
+			}
+
+			if (base.OwnerClientId != networkManager.LocalClientId)
+			{
+				if (networkManager.LogLevel <= Unity.Netcode.LogLevel.Normal)
+				{
+					Debug.LogError("Only the owner can invoke a ServerRpc that requires ownership!");
+				}
+
+				return;
+			}
+
+			FastBufferWriter bufferWriter = new FastBufferWriter(256, Unity.Collections.Allocator.Temp);
+			bufferWriter.WriteValueSafe(in obj, default(FastBufferWriter.ForNetworkSerializable));
+			bufferWriter.WriteValueSafe(placementPosition);
+			NetworkManager.Singleton.CustomMessagingManager.SendNamedMessageToAll("MakeObjectFall", bufferWriter, NetworkDelivery.Reliable);
+
+			if (obj.TryGet(out var networkObject))
+			{
+				GrabbableObject component = networkObject.GetComponent<GrabbableObject>();
+				if (!base.IsOwner)
+				{
+					MakeObjectFall(component, placementPosition);
+				}
+			}
+		}
+		[ClientRpc]
+		public void MakeObjectFallClientRpc(NetworkObjectReference obj, Vector3 placementPosition)
+		{
+			NetworkManager networkManager = base.NetworkManager;
+			if ((object)networkManager == null || !networkManager.IsListening)
+			{
+				return;
+			}
+
+			FastBufferWriter bufferWriter = new FastBufferWriter(256, Unity.Collections.Allocator.Temp);
+			bufferWriter.WriteValueSafe(in obj, default(FastBufferWriter.ForNetworkSerializable));
+			bufferWriter.WriteValueSafe(in placementPosition);
+			NetworkManager.Singleton.CustomMessagingManager.SendNamedMessageToAll("MakeObjectFall", bufferWriter, NetworkDelivery.Reliable);
+
+			if (obj.TryGet(out var networkObject))
+			{
+				GrabbableObject component = networkObject.GetComponent<GrabbableObject>();
+				if (!base.IsOwner)
+				{
+					MakeObjectFall(component, placementPosition);
+				}
+			}
+		}
+
+		public void MakeObjectFall(GrabbableObject obj, Vector3 placementPosition)
+		{
+			GameObject ship = GameObject.Find("/Environment/HangarShip");
+
+			ShipMaid.Log($"Request to make GrabbableObject {obj.name} fall to ground");
+			obj.gameObject.transform.SetPositionAndRotation(placementPosition, obj.transform.rotation);
+			obj.hasHitGround = false;
+			obj.startFallingPosition = placementPosition;
+			if (obj.transform.parent != null)
+			{
+				obj.startFallingPosition = obj.transform.parent.InverseTransformPoint(obj.startFallingPosition);
+			}
+			obj.FallToGround(false);
+		}
+
+		[ClientRpc]
+		public void RunClientRpc(NetworkObjectReference obj, Vector3 placementPosition)
+		{
+			MakeObjectFallServerRpc(obj, placementPosition);
+		}
+	}
 	[HarmonyPatch]
 	internal class ShipMaidFunctions
 	{
-
+		// Wanted a reference to the player object
 		public static PlayerControllerB localPlayerController;
 
 		[HarmonyPatch(typeof(PlayerControllerB), "ConnectClientToPlayerObject")]
@@ -28,8 +113,54 @@ namespace ShipMaid
 		public static void OnLocalPlayerConnect(PlayerControllerB __instance)
 		{
 			localPlayerController = __instance;
+			if (localPlayerController.IsClient)
+				NetworkManagerInit();
 		}
-		
+		public static void MakeObjectFallRpc(GrabbableObject obj, Vector3 placementPosition)
+		{
+			var pni = GetNetworkingObjectManager();
+
+			if (pni != null)
+			{
+				ShipMaid.Log($"NetworkingObjectManager - Network behavior found {pni.name}");
+				pni.RunClientRpc(obj.NetworkObject, placementPosition);
+			}
+			else
+			{
+				ShipMaid.Log($"NetworkingObjectManager not found ");
+			}
+		}
+
+		public static NetworkingObjectManager GetNetworkingObjectManager()
+		{
+			GameObject terminal = GameObject.Find("/Environment/HangarShip/Terminal");
+			if (terminal != null)
+			{
+				ShipMaid.Log($"Terminal found {terminal.name}");
+				return terminal.GetComponentInChildren<NetworkingObjectManager>();
+			}
+			return null;
+		}
+
+		public static void NetworkManagerInit()
+		{
+			ShipMaid.Log("Registering named message");
+			NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("MakeObjectFall", (senderClientId, reader) =>
+			{
+				if (senderClientId != localPlayerController.playerClientId)
+				{
+					reader.ReadValueSafe(out NetworkObjectReference value, default(FastBufferWriter.ForNetworkSerializable));
+					reader.ReadValueSafe(out Vector3 value3);
+					if (value.TryGet(out var networkObject))
+					{
+						GrabbableObject component = networkObject.GetComponent<GrabbableObject>();
+
+						GetNetworkingObjectManager().MakeObjectFall(component, value3);
+					}
+				}
+			});
+		}
+
 		/// <summary>
 		/// Get position of the ship.
 		/// </summary>
@@ -48,9 +179,9 @@ namespace ShipMaid
 		{
 			GameObject ship = GameObject.Find("/Environment/HangarShip");
 			Vector3 shiplocation = ship.transform.position;
-			shiplocation.z += 1.5f;
-			shiplocation.x += -5f;
-			shiplocation.y += .05f;
+			shiplocation.z += -5.75f;
+			shiplocation.x += -4.85f;
+			shiplocation.y += 1.66f;
 			return shiplocation;
 		}
 
@@ -211,15 +342,6 @@ namespace ShipMaid
 
 		}
 
-		public static void NetworkTransformed(GrabbableObject obj, Vector3 placementPosition)
-		{
-			var weightBefore = localPlayerController.carryWeight;
-			GameObject ship = GameObject.Find("/Environment/HangarShip");
-			localPlayerController.PlaceGrabbableObject(ship.transform, placementPosition, false, obj);
-			localPlayerController.PlaceObjectServerRpc(obj.gameObject.GetComponent<NetworkObject>(), ship.GetComponent<NetworkObject>(), placementPosition, false);
-			localPlayerController.carryWeight = weightBefore;
-		}
-
 		private static void OrganizeItems(List<GrabbableObject> objects, bool twoHanded)
 		{
 			// Organize two handed object in a different location than single handed
@@ -289,16 +411,7 @@ namespace ShipMaid
 						// Move the object if position needs adjusted
 						if (!SameLocation(obj.transform.position, placementPosition))
 						{
-							//ShipMaid.Log($"Moving object - {obj.name} - From: {obj.transform.position.x},{obj.transform.position.y},{obj.transform.position.z} to {placementPosition.x},{placementPosition.y},{placementPosition.z}");
-							//obj.gameObject.transform.SetPositionAndRotation(placementPosition, obj.transform.rotation);
-							NetworkTransformed(obj,placementPosition);
-							//obj.hasHitGround = false;
-							//obj.startFallingPosition = obj.transform.position;
-							//if (obj.transform.parent != null)
-							//{
-							//	obj.startFallingPosition = obj.transform.parent.InverseTransformPoint(obj.startFallingPosition);
-							//}
-							//obj.FallToGround(false);
+							MakeObjectFallRpc(obj, placementPosition);
 						}
 					}
 					itemCounter++;

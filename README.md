@@ -1,7 +1,6 @@
 # LethalCompanyShipMaid
 A mod where the ship and the storage closet is cleaned up when you ~~scan~~ press the associated keybinding within the ship.
 
-
 # Features
 - ~~Scan~~ Keypresses will organize each item type in groups by the name of the item
   - Ship cleanup default keybinding is 'm'
@@ -12,6 +11,8 @@ A mod where the ship and the storage closet is cleaned up when you ~~scan~~ pres
  - Keybindings can be modified in the cfg file
 
 # Changes
+- V2.1.0
+  - Updated the networking for better tying to client side functions
 - V2.0.0
   - Made the system network compatible (definitely buggy)
 - V1.1.0
@@ -26,7 +27,6 @@ A mod where the ship and the storage closet is cleaned up when you ~~scan~~ pres
 4. No further steps needed
 
 # Feedback
-- This mod was thrown together very quickly. 
 - Feel free to leave feedback or requests at [my github](https://github.com/bozzobrain/LethalCompanyShipMaid).
 
 # Buy me a coffee

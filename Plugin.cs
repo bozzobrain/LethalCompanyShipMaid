@@ -1,9 +1,11 @@
 ﻿using BepInEx;
 using BepInEx.Logging;
 using Dissonance;
+using GameNetcodeStuff;
 using HarmonyLib;
 using System;
 using System.Reflection;
+using Unity.Netcode;
 
 namespace ShipMaid
 {
@@ -13,7 +15,7 @@ namespace ShipMaid
 	{
 		private const string GUID = "ShipMaid";
 		private const string NAME = "ShipMaid";
-		private const string VERSION = "2.0.0";
+		private const string VERSION = "2.1.0";
 
 		public static ShipMaid instance;
 		private void Awake()
