@@ -180,7 +180,7 @@ namespace ShipMaid
 			GameObject ship = GameObject.Find("/Environment/HangarShip");
 			Vector3 shiplocation = ship.transform.position;
 			shiplocation.z += -5.75f;
-			shiplocation.x += -4.85f;
+			shiplocation.x += -4.25f;
 			shiplocation.y += 1.66f;
 			return shiplocation;
 		}
@@ -363,10 +363,10 @@ namespace ShipMaid
 			}
 
 			// calculate a z offset that places objects on different z location by type
-			float objectTypeZOffset = 2.75f / objectNames.Count;
+			float objectTypeZOffset = 2.25f / objectNames.Count;
 			if (twoHanded)
 			{
-				objectTypeZOffset = 3.5f / objectNames.Count;
+				objectTypeZOffset = 2.75f / objectNames.Count;
 			}
 			int itemCounter = 0;
 

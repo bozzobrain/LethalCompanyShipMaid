@@ -11,6 +11,8 @@ A mod where the ship and the storage closet is cleaned up when you ~~scan~~ pres
  - Keybindings can be modified in the cfg file
 
 # Changes
+- V2.1.1
+  - Adjusted loot placement to avoid suit rack
 - V2.1.0
   - Updated the networking for better tying to client side functions
 - V2.0.0
