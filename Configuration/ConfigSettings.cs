@@ -9,7 +9,7 @@ namespace ShipMaid.Configuration
 {
     public static class ConfigSettings
     {
-       
+
 
 
         public static Dictionary<string, ConfigEntryBase> currentConfigEntries = new Dictionary<string, ConfigEntryBase>();
@@ -30,26 +30,36 @@ namespace ShipMaid.Configuration
             KeyboardMapping = "<Keyboard>/n",
             ActionDescription = "Activate ship maid closet keybind.",
         };
-		public static ConfigSetupString OrganizationTechnique = new ConfigSetupString()
+        public static ConfigSetupString OrganizationTechnique = new ConfigSetupString()
+        {
+            pluginName = "ShipMaid",
+            SettingName = "OrganizationMethod",
+            SettingValue = "Value",
+            SettingDescription = "Choose organization method, spread by [Value] or [Stack] perfectly.",
+        };
+        public static ConfigSetupString TwoHandedItemLocation = new ConfigSetupString()
+        {
+            pluginName = "ShipMaid",
+            SettingName = "TwoHandedItemLocation",
+            SettingValue = "Front",
+            SettingDescription = "Choose location for two handed objects, [Front] of ship, or [Back] of ship. The opposite location will have the single handed items",
+        };
+        public static ConfigSetupString ItemGrouping = new ConfigSetupString()
+        {
+            pluginName = "ShipMaid",
+            SettingName = "ItemGrouping",
+            SettingValue = "Tight",
+            SettingDescription = "[Loose] or [Tight]",
+        };
+
+
+
+		public static ConfigSetupList ClosetLocationOverride = new ConfigSetupList()
 		{
 			pluginName = "ShipMaid",
-			SettingName = "OrganizationMethod",
-			SettingValue = "Value",
-			SettingDescription = "Choose organization method, spread by [Value] or [Stack] perfectly.",
-		};
-		public static ConfigSetupString TwoHandedItemLocation = new ConfigSetupString()
-		{
-			pluginName = "ShipMaid",
-			SettingName = "TwoHandedItemLocation",
-			SettingValue = "Front",
-			SettingDescription = "Choose location for two handed objects, [Front] of ship, or [Back] of ship. The opposite location will have the single handed items",
-		};
-		public static ConfigSetupString ItemGrouping = new ConfigSetupString()
-		{
-			pluginName = "ShipMaid",
-			SettingName = "ItemGrouping",
-			SettingValue = "Tight",
-			SettingDescription = "[Loose] or [Tight]",
+			SettingName = "ClosetLocationOverride",
+			SettingValue = "Whoopie,Key,Flashlight,StunGrenade",
+			SettingDescription = "List of items separated by comma that will be automatically placed in the storage container on ship cleanup.",
 		};
 
 		public static void BindConfigSettings()
@@ -60,6 +70,7 @@ namespace ShipMaid.Configuration
 			currentConfigEntries = OrganizationTechnique.Bind(currentConfigEntries);
 			currentConfigEntries = TwoHandedItemLocation.Bind(currentConfigEntries);
 			currentConfigEntries = ItemGrouping.Bind(currentConfigEntries);
+			currentConfigEntries = ClosetLocationOverride.Bind(currentConfigEntries);
 
 			//currentConfigEntries.Add(ShipMaidShipCleanupInputAction.Key.Definition.Key, (ConfigEntryBase)(object)ShipMaidShipCleanupInputAction.Key);
 			//         currentConfigEntries.Add(ShipMaidClosetCleanupInputAction.Key.Definition.Key, (ConfigEntryBase)(object)ShipMaidClosetCleanupInputAction.Key);

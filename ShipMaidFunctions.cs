@@ -126,7 +126,9 @@ namespace ShipMaid
 	[HarmonyPatch]
 	internal class ShipMaidFunctions
 	{
-		static List<string> ItemsForStorageCloset = new() { "Whoopie", "Flashlight","Key" };
+		//static List<string> ItemsForStorageCloset = new() { "Whoopie", "Flashlight","Key" };
+		static List<string> ItemsForStorageCloset = ConfigSettings.ClosetLocationOverride.GetStrings(ConfigSettings.ClosetLocationOverride.Key.Value);
+		
 		// Wanted a reference to the player object
 		public static PlayerControllerB localPlayerController;
 
@@ -369,12 +371,12 @@ namespace ShipMaid
 			}
 			OrganizeItems(oneHandedObjects, false);
 			OrganizeItems(twoHandedObjects, true);
-
 		}
 
 
 		private static void OrganizeItems(List<GrabbableObject> objects, bool twoHanded)
 		{
+			StorageClosetHelper sch = new StorageClosetHelper();
 			// Get all object types and make a list of them
 			List<string> objectNames = new List<string>();
 			foreach (var scrap in objects)
@@ -385,7 +387,7 @@ namespace ShipMaid
 				}
 			}
 			float xPositionOffset = 0;
-
+			 
 		
 			// Organize two handed object in a different location than single handed				
 			// Single handed objects are closer to the door				
@@ -430,14 +432,12 @@ namespace ShipMaid
 
 			// Organize items by the name of the object (like objects together)
 			foreach (var objectType in objectNames)
-			{
-			
+			{			
 				var objectsOfType = objects.Where(obj => obj.name.Contains(objectType)).ToList();
 				
 				// If object is on blacklist (forced to closet) - place in closet
-				if (ItemsForStorageCloset.Where(item => objectType.Contains(item)).Any())
+				if (ItemsForStorageCloset.Where(objectType.Contains).Any())
 				{
-					StorageClosetHelper sch = new StorageClosetHelper();
 					sch.PlaceStorageObjectOnShelve(objectsOfType);
 					continue;
 				}
@@ -504,6 +504,8 @@ namespace ShipMaid
 					itemCounter++;
 				}
 			}
+			// TODO - This seems like a hacky approach (double movement)
+			OrganizeStorageCloset();
 		}
 	}
 }
