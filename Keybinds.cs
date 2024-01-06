@@ -6,6 +6,7 @@ using static UnityEngine.InputSystem.InputAction;
 using Unity.Netcode;
 using UnityEngine.InputSystem;
 using UnityEngine;
+using ShipMaid.Configuration;
 
 namespace ShipMaid
 {
@@ -22,8 +23,9 @@ namespace ShipMaid
         public static void OnLocalPlayerConnect(PlayerControllerB __instance)
         {
             localPlayerController = __instance;
-            shipMaidCleanupShip = new InputAction(null, 0, ConfigSettings.activateShipMaidKey.Value, "Press", null, null);
-            shipMaidCleanupCloset = new InputAction(null, 0, ConfigSettings.activateShipMaidClosetKey.Value, "Press", null, null);
+            shipMaidCleanupShip = new InputAction(null, 0, ConfigSettings.ShipMaidShipCleanupInputAction.Key.Value, "Press", null, null);
+            shipMaidCleanupCloset = new InputAction(null, 0, ConfigSettings.ShipMaidClosetCleanupInputAction.Key.Value, "Press", null, null);
+
 			if (localPlayerController.gameObject.activeSelf)
             {
                 SubscribeToEvents();

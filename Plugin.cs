@@ -3,6 +3,7 @@ using BepInEx.Logging;
 using Dissonance;
 using GameNetcodeStuff;
 using HarmonyLib;
+using ShipMaid.Configuration;
 using System;
 using System.Reflection;
 using Unity.Netcode;
@@ -10,7 +11,7 @@ using Unity.Netcode;
 namespace ShipMaid
 {
 
-	[BepInPlugin(GUID, NAME, VERSION)]
+    [BepInPlugin(GUID, NAME, VERSION)]
 	internal class ShipMaid : BaseUnityPlugin
 	{
 		private const string GUID = "ShipMaid";

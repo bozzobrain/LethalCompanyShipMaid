@@ -7,6 +7,8 @@ using System.Reflection;
 using Discord;
 using GameNetcodeStuff;
 using HarmonyLib;
+using ShipMaid.Configuration;
+using ShipMaid.EntityHelpers;
 using ShipMaid.Patchers;
 using TMPro;
 using Unity.Netcode;
@@ -25,7 +27,7 @@ namespace ShipMaid
 	public class NetworkingObjectManager : NetworkBehaviour
 	{
 		[ServerRpc]
-		public void MakeObjectFallServerRpc(NetworkObjectReference obj, Vector3 placementPosition)
+		public void MakeObjectFallServerRpc(NetworkObjectReference obj, Vector3 placementPosition, bool shipParent)
 		{
 			NetworkManager networkManager = base.NetworkManager;
 			if ((object)networkManager == null || !networkManager.IsListening)
@@ -46,6 +48,7 @@ namespace ShipMaid
 			FastBufferWriter bufferWriter = new FastBufferWriter(256, Unity.Collections.Allocator.Temp);
 			bufferWriter.WriteValueSafe(in obj, default(FastBufferWriter.ForNetworkSerializable));
 			bufferWriter.WriteValueSafe(placementPosition);
+			bufferWriter.WriteValueSafe(shipParent);
 			NetworkManager.Singleton.CustomMessagingManager.SendNamedMessageToAll("MakeObjectFall", bufferWriter, NetworkDelivery.Reliable);
 
 			if (obj.TryGet(out var networkObject))
@@ -53,12 +56,12 @@ namespace ShipMaid
 				GrabbableObject component = networkObject.GetComponent<GrabbableObject>();
 				if (!base.IsOwner)
 				{
-					MakeObjectFall(component, placementPosition);
+					MakeObjectFall(component, placementPosition, shipParent);
 				}
 			}
 		}
 		[ClientRpc]
-		public void MakeObjectFallClientRpc(NetworkObjectReference obj, Vector3 placementPosition)
+		public void MakeObjectFallClientRpc(NetworkObjectReference obj, Vector3 placementPosition, bool shipParent)
 		{
 			NetworkManager networkManager = base.NetworkManager;
 			if ((object)networkManager == null || !networkManager.IsListening)
@@ -69,6 +72,7 @@ namespace ShipMaid
 			FastBufferWriter bufferWriter = new FastBufferWriter(256, Unity.Collections.Allocator.Temp);
 			bufferWriter.WriteValueSafe(in obj, default(FastBufferWriter.ForNetworkSerializable));
 			bufferWriter.WriteValueSafe(in placementPosition);
+			bufferWriter.WriteValueSafe(shipParent);
 			NetworkManager.Singleton.CustomMessagingManager.SendNamedMessageToAll("MakeObjectFall", bufferWriter, NetworkDelivery.Reliable);
 
 			if (obj.TryGet(out var networkObject))
@@ -76,16 +80,33 @@ namespace ShipMaid
 				GrabbableObject component = networkObject.GetComponent<GrabbableObject>();
 				if (!base.IsOwner)
 				{
-					MakeObjectFall(component, placementPosition);
+					MakeObjectFall(component, placementPosition, shipParent);
 				}
 			}
 		}
 
-		public void MakeObjectFall(GrabbableObject obj, Vector3 placementPosition)
+		public void MakeObjectFall(GrabbableObject obj, Vector3 placementPosition, bool shipParent)
 		{
 			GameObject ship = GameObject.Find("/Environment/HangarShip");
-
-			ShipMaid.Log($"Request to make GrabbableObject {obj.name} fall to ground");
+			GameObject storageCloset = GameObject.Find("/Environment/HangarShip/StorageCloset");
+			string debugLocation = string.Empty;
+			if (shipParent)
+			{
+				if(obj.gameObject.transform.GetParent() == null || obj.gameObject.transform.GetParent().name != "HangarShip")
+				{
+					obj.gameObject.transform.SetParent(ship.transform);
+				}
+				debugLocation = "ship";
+			}
+			else
+			{
+				if (obj.gameObject.transform.GetParent()== null ||obj.gameObject.transform.GetParent().name != "StorageCloset")
+				{  
+					obj.gameObject.transform.SetParent(storageCloset.transform);
+				}
+				debugLocation = "storage";
+			}
+			ShipMaid.Log($"Request to make GrabbableObject {obj.name} fall to ground in {debugLocation}");
 			obj.gameObject.transform.SetPositionAndRotation(placementPosition, obj.transform.rotation);
 			obj.hasHitGround = false;
 			obj.startFallingPosition = placementPosition;
@@ -97,14 +118,15 @@ namespace ShipMaid
 		}
 
 		[ClientRpc]
-		public void RunClientRpc(NetworkObjectReference obj, Vector3 placementPosition)
+		public void RunClientRpc(NetworkObjectReference obj, Vector3 placementPosition, bool shipParent)
 		{
-			MakeObjectFallServerRpc(obj, placementPosition);
+			MakeObjectFallServerRpc(obj, placementPosition, shipParent);
 		}
 	}
 	[HarmonyPatch]
 	internal class ShipMaidFunctions
 	{
+		static List<string> ItemsForStorageCloset = new() { "Whoopie", "Flashlight","Key" };
 		// Wanted a reference to the player object
 		public static PlayerControllerB localPlayerController;
 
@@ -116,14 +138,14 @@ namespace ShipMaid
 			if (localPlayerController.IsClient)
 				NetworkManagerInit();
 		}
-		public static void MakeObjectFallRpc(GrabbableObject obj, Vector3 placementPosition)
+		public static void MakeObjectFallRpc(GrabbableObject obj, Vector3 placementPosition, bool shipParent)
 		{
 			var pni = GetNetworkingObjectManager();
 
 			if (pni != null)
 			{
 				ShipMaid.Log($"NetworkingObjectManager - Network behavior found {pni.name}");
-				pni.RunClientRpc(obj.NetworkObject, placementPosition);
+				pni.RunClientRpc(obj.NetworkObject, placementPosition, shipParent);
 			}
 			else
 			{
@@ -151,11 +173,12 @@ namespace ShipMaid
 				{
 					reader.ReadValueSafe(out NetworkObjectReference value, default(FastBufferWriter.ForNetworkSerializable));
 					reader.ReadValueSafe(out Vector3 value3);
+					reader.ReadValueSafe(out bool shipParent);
 					if (value.TryGet(out var networkObject))
 					{
 						GrabbableObject component = networkObject.GetComponent<GrabbableObject>();
 
-						GetNetworkingObjectManager().MakeObjectFall(component, value3);
+						GetNetworkingObjectManager().MakeObjectFall(component, value3, shipParent);
 					}
 				}
 			});
@@ -180,7 +203,7 @@ namespace ShipMaid
 			GameObject ship = GameObject.Find("/Environment/HangarShip");
 			Vector3 shiplocation = ship.transform.position;
 			shiplocation.z += -5.75f;
-			shiplocation.x += -4.25f;
+			shiplocation.x += -5.25f;
 			shiplocation.y += 1.66f;
 			return shiplocation;
 		}
@@ -192,23 +215,9 @@ namespace ShipMaid
 		/// <returns>Offset x value scaled by scrap value.</returns>
 		private static float GetXOffsetFromScrapValue(GrabbableObject obj)
 		{
-			return ((obj.scrapValue - 10) / 200f) * 5;
+			return ((obj.scrapValue - 10) / 200f) * 4;
 		}
 
-
-		/// <summary>
-		/// Get a list of all scrap in the storage closet.
-		/// </summary>
-		/// <returns>List of all scrap in storage closet.</returns>
-		private static List<GrabbableObject> GetObjectsInStorageCloset()
-		{
-			GameObject storageCloset = GameObject.Find("/Environment/HangarShip/StorageCloset");
-			// Get all objects that can be picked up from inside the ship. Also remove items which technically have
-			// scrap value but don't actually add to your quota.
-			var loot = storageCloset.GetComponentsInChildren<GrabbableObject>()
-				.Where(obj => obj.name != "ClipboardManual" && obj.name != "StickyNoteItem").ToList();
-			return loot;
-		}
 
 		/// <summary>
 		/// Get a list of all scrap in the ship.
@@ -237,7 +246,8 @@ namespace ShipMaid
 			}
 			else if (where == "closet")
 			{
-				var closetObjects = GetObjectsInStorageCloset();
+				StorageClosetHelper sch = new();
+				var closetObjects = sch.GetObjectsInStorageCloset();
 				closetObjects.Do(scrap => ShipMaid.Log($"{scrap.name} - ${scrap.scrapValue} - ${scrap.targetFloorPosition.x}- ${scrap.targetFloorPosition.y}- ${scrap.targetFloorPosition.z}"));
 			}
 		}
@@ -257,10 +267,49 @@ namespace ShipMaid
 		/// Organizes the scrap in the storage closet.
 		/// </summary>
 		/// 
+		//public static void OrganizeStorageCloset()
+		//{
+		//	GameObject storageCloset = GameObject.Find("/Environment/HangarShip/StorageCloset");
+		//	var storageClosetObjects = GetObjectsInStorageCloset();
+		//	List<string> objectNames = new List<string>();
+		//	foreach (var scrap in storageClosetObjects)
+		//	{
+		//		if (!objectNames.Contains(scrap.name))
+		//		{
+		//			objectNames.Add(scrap.name);
+		//		}
+		//	}
+		//	foreach (var objectType in objectNames)
+		//	{
+		//		var objectsOfType = storageClosetObjects.Where(obj => obj.name.Contains(objectType)).ToList();
+
+		//		// Make sure this item is not being held currently
+		//		var firstObjectOfType = objectsOfType.FirstOrDefault(obj => !obj.isHeld);
+
+		//		if (firstObjectOfType != null)
+		//		{
+		//			var placementPosition = firstObjectOfType.transform.position;
+		//			var placementRotation = firstObjectOfType.transform.rotation;
+		//			foreach (var obj in objectsOfType)
+		//			{
+		//				// Make sure we dont move a held object
+		//				if (obj.isHeld)
+		//					continue;
+
+						
+		//					MakeObjectFallRpc(obj, placementPosition);
+		//			}
+		//		}
+		//	}
+		//}
+		/// <summary>
+		/// Organizes the scrap in the storage closet.
+		/// </summary>
+		/// 
 		public static void OrganizeStorageCloset()
 		{
-			GameObject storageCloset = GameObject.Find("/Environment/HangarShip/StorageCloset");
-			var storageClosetObjects = GetObjectsInStorageCloset();
+			var sch = new StorageClosetHelper();
+			var storageClosetObjects = sch.GetObjectsInStorageCloset();
 			List<string> objectNames = new List<string>();
 			foreach (var scrap in storageClosetObjects)
 			{
@@ -277,33 +326,13 @@ namespace ShipMaid
 				var firstObjectOfType = objectsOfType.FirstOrDefault(obj => !obj.isHeld);
 
 				if (firstObjectOfType != null)
-				{
-					var placementPosition = firstObjectOfType.transform.position;
-					var placementRotation = firstObjectOfType.transform.rotation;
-					foreach (var obj in objectsOfType)
-					{
-						// Make sure we dont move a held object
-						if (obj.isHeld)
-							continue;
+				{					
 
-						ShipMaid.Log($"Moving object - {obj.name} - From: {obj.transform.position.x},{obj.transform.position.y},{obj.transform.position.z} to {placementPosition.x},{placementPosition.y},{placementPosition.z}");
-						obj.gameObject.transform.SetPositionAndRotation(placementPosition, placementRotation);
-
-
-						obj.hasHitGround = false;
-						obj.startFallingPosition = obj.transform.position;
-						if (obj.transform.parent != null)
-						{
-							obj.startFallingPosition = obj.transform.parent.InverseTransformPoint(obj.startFallingPosition);
-						}
-						obj.FallToGround(false);
-
-						placementPosition.x += 0.1f;
-					}
+						sch.PlaceStorageObjectOnShelve(objectsOfType);
+					
 				}
 			}
 		}
-
 		/// <summary>
 		/// Organizes the scrap in the ship.
 		/// </summary>
@@ -311,7 +340,8 @@ namespace ShipMaid
 		public static void OrganizeShipLoot()
 		{
 			var shipObjects = ObjectsInShip();
-			var storageClosetObjects = GetObjectsInStorageCloset();
+			var sch = new StorageClosetHelper();
+			var storageClosetObjects = sch.GetObjectsInStorageCloset();
 
 			// Do not adjust the storage closet objects
 			foreach (var storageClosetObject in storageClosetObjects)
@@ -342,16 +372,9 @@ namespace ShipMaid
 
 		}
 
+
 		private static void OrganizeItems(List<GrabbableObject> objects, bool twoHanded)
 		{
-			// Organize two handed object in a different location than single handed
-			// Single handed objects are closer to the door
-			var twoHandedOffset = 0;
-			if (twoHanded)
-			{
-				twoHandedOffset = 4;
-			}
-
 			// Get all object types and make a list of them
 			List<string> objectNames = new List<string>();
 			foreach (var scrap in objects)
@@ -361,32 +384,86 @@ namespace ShipMaid
 					objectNames.Add(scrap.name);
 				}
 			}
+			float xPositionOffset = 0;
 
+		
+			// Organize two handed object in a different location than single handed				
+			// Single handed objects are closer to the door				
 			// calculate a z offset that places objects on different z location by type
-			float objectTypeZOffset = 2.25f / objectNames.Count;
-			if (twoHanded)
+			float frontOfShipAreaZOffset = 2.25f / objectNames.Count;
+			float frontOfShipXAreaOffset = 0;
+			float backOfShipAreaZOffset = 2.75f / objectNames.Count;
+			float backOfShipXAreaOffset = 7;
+
+			float objectTypeZOffset = 0;
+			float twoHandedOffset = 0;
+			if (twoHanded )
 			{
-				objectTypeZOffset = 2.75f / objectNames.Count;
+				if (ConfigSettings.TwoHandedItemLocation.Key.Value == "Front")
+				{
+					twoHandedOffset = frontOfShipXAreaOffset;
+					objectTypeZOffset = frontOfShipAreaZOffset;
+				}
+				else
+				{
+					twoHandedOffset = backOfShipXAreaOffset;
+					objectTypeZOffset = backOfShipAreaZOffset;
+				}
+
 			}
+			else
+			{
+				if (ConfigSettings.TwoHandedItemLocation.Key.Value == "Front")
+				{
+					objectTypeZOffset = backOfShipAreaZOffset;
+					twoHandedOffset = backOfShipXAreaOffset;
+				}
+				else
+				{
+					twoHandedOffset = frontOfShipXAreaOffset;
+					objectTypeZOffset = frontOfShipAreaZOffset;
+				}
+
+			}
+
 			int itemCounter = 0;
 
 			// Organize items by the name of the object (like objects together)
 			foreach (var objectType in objectNames)
 			{
+			
 				var objectsOfType = objects.Where(obj => obj.name.Contains(objectType)).ToList();
-
+				
+				// If object is on blacklist (forced to closet) - place in closet
+				if (ItemsForStorageCloset.Where(item => objectType.Contains(item)).Any())
+				{
+					StorageClosetHelper sch = new StorageClosetHelper();
+					sch.PlaceStorageObjectOnShelve(objectsOfType);
+					continue;
+				}
 				// Make sure this item is not being held currently
 				var firstObjectOfType = objectsOfType.FirstOrDefault(obj => !obj.isHeld);
 
 				// Keep track of offset locations to disuade locations that identical (same scrap value)
 				List<float> offsetLocations = new List<float>();
 
+				// if stacking move the stacks around a bit to separate piles
+				if (ConfigSettings.OrganizationTechnique.Key.Value == "Stack")
+				{
+					System.Random r = new();
+					xPositionOffset = (float)r.NextDouble() * r.Next(-1, 1);
+
+					if (ConfigSettings.ItemGrouping.Key.Value == "Loose") xPositionOffset *= 3.0f;
+				}
 				// Make sure first object is not null in type
-				if (firstObjectOfType != null)
+				if (firstObjectOfType != null) 
 				{
 					// Find placement location adjust z by small amount for each type of object
 					var placementPosition = GetShipCenterLocation();
-					placementPosition.z -= objectTypeZOffset * itemCounter;
+					if (ConfigSettings.ItemGrouping.Key.Value == "Loose")
+						placementPosition.z -= objectTypeZOffset * itemCounter;
+					else
+						placementPosition.z -= (objectTypeZOffset * itemCounter * 0.1f) + objectTypeZOffset *0.9f*objectNames.Count;
 
 					// Two handed objects can be moved closer to the wall
 					if (twoHanded)
@@ -399,19 +476,29 @@ namespace ShipMaid
 							continue;
 
 						// Shift item position by scrap value (higher value is closer to door)
-						placementPosition.x = GetShipCenterLocation().x + GetXOffsetFromScrapValue(obj) + twoHandedOffset;
+						placementPosition.x = GetShipCenterLocation().x + twoHandedOffset;
 
-						// If we already placed an item here, move it by a small amount to offset common values
-						while (offsetLocations.Contains(placementPosition.x))
+						// Choose how to organze each item of loot
+						if(ConfigSettings.OrganizationTechnique.Key.Value == "Value")
 						{
-							placementPosition.x += 0.1f;
+							placementPosition.x += GetXOffsetFromScrapValue(obj);
+							// If we already placed an item here, move it by a small amount to offset common values
+							while (offsetLocations.Contains(placementPosition.x))
+							{
+								placementPosition.x += 0.1f;
+							}
+							offsetLocations.Add(placementPosition.x);
 						}
-						offsetLocations.Add(placementPosition.x);
+						else
+						{
+							placementPosition.x += xPositionOffset;
+						}
+
 
 						// Move the object if position needs adjusted
 						if (!SameLocation(obj.transform.position, placementPosition))
 						{
-							MakeObjectFallRpc(obj, placementPosition);
+							MakeObjectFallRpc(obj, placementPosition,true);
 						}
 					}
 					itemCounter++;
