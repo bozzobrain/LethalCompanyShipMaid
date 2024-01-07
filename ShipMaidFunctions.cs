@@ -126,7 +126,6 @@ namespace ShipMaid
 	[HarmonyPatch]
 	internal class ShipMaidFunctions
 	{
-
 		static List<string> ItemsForStorageCloset = ConfigSettings.ClosetLocationOverride.GetStrings(ConfigSettings.ClosetLocationOverride.Key.Value);
 		static List<string> SortingBlacklist = ConfigSettings.SortingLocationBlacklist.GetStrings(ConfigSettings.SortingLocationBlacklist.Key.Value);
 
@@ -212,13 +211,32 @@ namespace ShipMaid
 		}
 
 		/// <summary>
+		/// Get the highest value of the loot in the ship.
+		/// </summary>
+		/// <returns>The value of the highest valued loot on the ship.</returns>
+		private static float CalculateHighestScrapValue()
+		{
+			float highestScrap = 0;
+
+			foreach(GrabbableObject obj in ObjectsInShip())
+			{
+				if(obj.scrapValue > highestScrap)
+				{
+					highestScrap = obj.scrapValue;
+				}
+			}
+
+			return highestScrap;
+		}
+
+		/// <summary>
 		/// Get a value of x offset for a given scrap. Higher values have higher x offsets.
 		/// Scale the values by 3 units to group them but order by value
 		/// </summary>
 		/// <returns>Offset x value scaled by scrap value.</returns>
-		private static float GetXOffsetFromScrapValue(GrabbableObject obj)
+		private static float GetXOffsetFromScrapValue(GrabbableObject obj, float highestScrapValue)
 		{
-			return ((obj.scrapValue - 10) / 200f) * 4;
+			return ((obj.scrapValue - 10) / highestScrapValue) * 4;
 		}
 
 
@@ -313,7 +331,6 @@ namespace ShipMaid
 				}
 			}
 
-
 			// Sort objects by two handed and one handed
 			List<GrabbableObject> twoHandedObjects = new List<GrabbableObject>();
 			List<GrabbableObject> oneHandedObjects = new List<GrabbableObject>();
@@ -346,7 +363,6 @@ namespace ShipMaid
 			}
 			float xPositionOffset = 0;
 
-
 			// Organize two handed object in a different location than single handed				
 			// Single handed objects are closer to the door				
 			// calculate a z offset that places objects on different z location by type
@@ -369,7 +385,6 @@ namespace ShipMaid
 					twoHandedOffset = backOfShipXAreaOffset;
 					objectTypeZOffset = backOfShipAreaZOffset;
 				}
-
 			}
 			else
 			{
@@ -383,7 +398,6 @@ namespace ShipMaid
 					twoHandedOffset = frontOfShipXAreaOffset;
 					objectTypeZOffset = frontOfShipAreaZOffset;
 				}
-
 			}
 
 			int itemCounter = 0;
@@ -443,7 +457,7 @@ namespace ShipMaid
 						// Choose how to organze each item of loot
 						if (ConfigSettings.OrganizationTechnique.Key.Value == "Value")
 						{
-							placementPosition.x += GetXOffsetFromScrapValue(obj);
+							placementPosition.x += GetXOffsetFromScrapValue(obj, CalculateHighestScrapValue());
 							// If we already placed an item here, move it by a small amount to offset common values
 							while (offsetLocations.Contains(placementPosition.x))
 							{
