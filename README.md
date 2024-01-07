@@ -12,8 +12,10 @@ A mod where the ship and the storage closet is cleaned up when you ~~scan~~ pres
 ## Config File Parameters
 - CleanupShipKey
 	- Keypress used to cleanup the ship only
+
 - CleanupClosetKey
 	- Keypress used to cleanup the closet
+
 - ItemGrouping
 	- Whether to group the items in tight clusters or to spread them out by value
 	- Options
@@ -21,7 +23,8 @@ A mod where the ship and the storage closet is cleaned up when you ~~scan~~ pres
 			- Spread items up the ship by the value
 		- [Stack]
 			- Keep items stacked on top of one another to reduce clutter
-			- Thanks to [jcsnider](https://github.com/jcsnider)
+		- Thanks to [jcsnider](https://github.com/jcsnider) for the suggestion
+
 - TwoHandedItemLocation
 	- Where to place the two handed items, and inherrently where to place the single handed objects.
 	- Options
@@ -31,18 +34,27 @@ A mod where the ship and the storage closet is cleaned up when you ~~scan~~ pres
 		- [Back]
 			- Two handed items to the back of the ship 
 			- One handed items to the front of the ship
-	- Thanks to [jcsnider](https://github.com/jcsnider) and [Artemis-afk](https://github.com/Artemis-afk)
+	- Thanks to [jcsnider](https://github.com/jcsnider) and [Artemis-afk](https://github.com/Artemis-afk) for the suggestion
 
 - OrganizationTechniques
-  - Options
-	- [Loose]
-		- Spread items accross the ship from left to right
-	- [Tight]
-		- Pack the items to the side of the ship with the suit rack.
+	- Options
+		- [Loose]
+			- Spread items accross the ship from left to right
+		- [Tight]
+			- Pack the items to the side of the ship with the suit rack.
+
 - ClosetLocationOverride
-  - A List of objects to force into the closet on ship cleanup
-	- Enter a list of item names in comma separated form to force these items to be placed in the closet instead of on the floor.
-		- Thanks to [jcsnider](https://github.com/jcsnider)
+	- A List of objects to force into the closet on ship cleanup
+		- Enter a list of item names in comma separated form to force these items to be placed in the closet instead of on the floor.
+	- Thanks to [jcsnider](https://github.com/jcsnider) for the suggestion
+
+- SortingDisabledList
+	- Items on this list will be ignored during the sorting process
+		- Enter a list of item names in comma separated form to ignore these items during organization.
+	- Thanks to [nontheoretical](https://github.com/nontheoretical) for the suggestion
+
+
+
 # Changes
 - V3.0.0
 	- Introduced a configuration system that will allow the customization and tailoring of the mod to your liking

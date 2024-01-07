@@ -9,7 +9,6 @@ namespace ShipMaid.EntityHelpers
 	public class StorageClosetHelper
 	{
 		GameObject StorageCloset;
-		Vector3 StorageClosetPosition;
 		Vector3 LeftDoor;
 		Vector3 RightDoor;
 		Vector3 Shelve1Center;
@@ -32,7 +31,6 @@ namespace ShipMaid.EntityHelpers
 		public StorageClosetHelper()
 		{
 			StorageCloset = GameObject.Find("/Environment/HangarShip/StorageCloset");
-			StorageClosetPosition = StorageCloset.transform.position;
 
 			// Cube.000 and Cube.002 are door entities - use location for bounding
 			var cube000 = StorageCloset.GetComponentsInChildren<Transform>().First(tf => tf.GetParent().name == "Cube.000").gameObject;
@@ -130,7 +128,6 @@ namespace ShipMaid.EntityHelpers
 				switch (shelveToPlaceOn)
 				{
 					case 1:
-
 						ShipMaidFunctions.MakeObjectFallRpc(obj, new(placementLocationX, Shelve1Center.y, Shelve1Center.z + StorageLocationZOffset + forwardBackwardOffset), false);
 						break;
 					case 2:

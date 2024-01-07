@@ -9,9 +9,6 @@ namespace ShipMaid.Configuration
 {
     public static class ConfigSettings
     {
-
-
-
         public static Dictionary<string, ConfigEntryBase> currentConfigEntries = new Dictionary<string, ConfigEntryBase>();
 
         public static ConfigSetupInputAction ShipMaidShipCleanupInputAction = new ConfigSetupInputAction()
@@ -20,7 +17,6 @@ namespace ShipMaid.Configuration
             ActionName = "CleanupShipKey",
             KeyboardMapping = "<Keyboard>/m",
             ActionDescription = "Activate ship maid ship keybind.",
-
         };
 
         public static ConfigSetupInputAction ShipMaidClosetCleanupInputAction = new ConfigSetupInputAction()
@@ -30,6 +26,7 @@ namespace ShipMaid.Configuration
             KeyboardMapping = "<Keyboard>/n",
             ActionDescription = "Activate ship maid closet keybind.",
         };
+
         public static ConfigSetupString OrganizationTechnique = new ConfigSetupString()
         {
             pluginName = "ShipMaid",
@@ -37,6 +34,7 @@ namespace ShipMaid.Configuration
             SettingValue = "Value",
             SettingDescription = "Choose organization method, spread by [Value] or [Stack] perfectly.",
         };
+
         public static ConfigSetupString TwoHandedItemLocation = new ConfigSetupString()
         {
             pluginName = "ShipMaid",
@@ -44,6 +42,7 @@ namespace ShipMaid.Configuration
             SettingValue = "Front",
             SettingDescription = "Choose location for two handed objects, [Front] of ship, or [Back] of ship. The opposite location will have the single handed items",
         };
+
         public static ConfigSetupString ItemGrouping = new ConfigSetupString()
         {
             pluginName = "ShipMaid",
@@ -52,14 +51,20 @@ namespace ShipMaid.Configuration
             SettingDescription = "[Loose] or [Tight]",
         };
 
-
-
 		public static ConfigSetupList ClosetLocationOverride = new ConfigSetupList()
 		{
 			pluginName = "ShipMaid",
 			SettingName = "ClosetLocationOverride",
 			SettingValue = "Whoopie,Key,Flashlight,StunGrenade",
 			SettingDescription = "List of items separated by comma that will be automatically placed in the storage container on ship cleanup.",
+		};
+
+		public static ConfigSetupList SortingLocationBlacklist = new ConfigSetupList()
+		{
+			pluginName = "ShipMaid",
+			SettingName = "SortingDisabledList",
+			SettingValue = "",
+			SettingDescription = "List of items separated by comma that will be ignored on sorting.",
 		};
 
 		public static void BindConfigSettings()
@@ -71,9 +76,8 @@ namespace ShipMaid.Configuration
 			currentConfigEntries = TwoHandedItemLocation.Bind(currentConfigEntries);
 			currentConfigEntries = ItemGrouping.Bind(currentConfigEntries);
 			currentConfigEntries = ClosetLocationOverride.Bind(currentConfigEntries);
+			currentConfigEntries = SortingLocationBlacklist.Bind(currentConfigEntries);
 
-			//currentConfigEntries.Add(ShipMaidShipCleanupInputAction.Key.Definition.Key, (ConfigEntryBase)(object)ShipMaidShipCleanupInputAction.Key);
-			//         currentConfigEntries.Add(ShipMaidClosetCleanupInputAction.Key.Definition.Key, (ConfigEntryBase)(object)ShipMaidClosetCleanupInputAction.Key);
 			TryRemoveOldConfigSettings();
         }
 
