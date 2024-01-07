@@ -56,6 +56,9 @@ A mod where the ship and the storage closet is cleaned up when you ~~scan~~ pres
 
 
 # Changes
+- V3.1.0
+	- Improved the handling of the bounds of the ship and storage closet to prevent items from clipping out of the ship.  
+	- Thanks to [nontheoretical](https://github.com/nontheoretical) for finding the issue.
 - V3.0.1
 	- Fixes
 		- Fixed a bug where modified scrap levels would teleport outside of ship when sorted by value

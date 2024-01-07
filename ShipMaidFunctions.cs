@@ -214,11 +214,11 @@ namespace ShipMaid
 		/// Get the highest value of the loot in the ship.
 		/// </summary>
 		/// <returns>The value of the highest valued loot on the ship.</returns>
-		private static float CalculateHighestScrapValue()
+		private static float CalculateHighestScrapValue(HangarShipHelper hsh)
 		{
 			float highestScrap = 0;
 
-			foreach(GrabbableObject obj in ObjectsInShip())
+			foreach(GrabbableObject obj in hsh.ObjectsInShip())
 			{
 				if(obj.scrapValue > highestScrap)
 				{
@@ -244,25 +244,12 @@ namespace ShipMaid
 		/// Get a list of all scrap in the ship.
 		/// </summary>
 		/// <returns>List of all scrap in ship.</returns>
-		private static List<GrabbableObject> ObjectsInShip()
-		{
-			GameObject ship = GameObject.Find("/Environment/HangarShip");
-			// Get all objects that can be picked up from inside the ship. Also remove items which technically have
-			// scrap value but don't actually add to your quota.
-			var loot = ship.GetComponentsInChildren<GrabbableObject>()
-				.Where(obj => obj.name != "ClipboardManual" && obj.name != "StickyNoteItem").ToList();
-			return loot;
-		}
-
-		/// <summary>
-		/// Get a list of all scrap in the ship.
-		/// </summary>
-		/// <returns>List of all scrap in ship.</returns>
 		private static void ReportScrapList(string where)
 		{
 			if (where == "ship")
 			{
-				var shipObjects = ObjectsInShip();
+				HangarShipHelper hsh = new();
+				var shipObjects = hsh.ObjectsInShip();
 				shipObjects.Do(scrap => ShipMaid.Log($"{scrap.name} - ${scrap.scrapValue} - ${scrap.targetFloorPosition.x}- ${scrap.targetFloorPosition.y}- ${scrap.targetFloorPosition.z}"));
 			}
 			else if (where == "closet")
@@ -318,8 +305,10 @@ namespace ShipMaid
 		/// 
 		public static void OrganizeShipLoot()
 		{
-			var shipObjects = ObjectsInShip();
 			var sch = new StorageClosetHelper();
+			var hsh = new HangarShipHelper();
+
+			var shipObjects = hsh.ObjectsInShip();
 			var storageClosetObjects = sch.GetObjectsInStorageCloset();
 
 			// Do not adjust the storage closet objects
@@ -352,6 +341,7 @@ namespace ShipMaid
 
 		private static void OrganizeItems(StorageClosetHelper sch, List<GrabbableObject> objects, bool twoHanded)
 		{
+			HangarShipHelper hsh = new();
 			// Get all object types and make a list of them
 			List<string> objectNames = new List<string>();
 			foreach (var scrap in objects)
@@ -427,9 +417,12 @@ namespace ShipMaid
 				if (ConfigSettings.OrganizationTechnique.Key.Value == "Stack")
 				{
 					System.Random r = new();
-					xPositionOffset = (float)r.NextDouble() * r.Next(-1, 1);
+					xPositionOffset = (float)r.NextDouble()*r.Next(-1,2);
 
-					if (ConfigSettings.ItemGrouping.Key.Value == "Loose") xPositionOffset *= 3.0f;
+					// Force objects to the boundaries for debugging
+					//xPositionOffset = r.Next(-1,2);
+
+					if (ConfigSettings.ItemGrouping.Key.Value == "Loose") xPositionOffset *= 2.0f;   
 				}
 				// Make sure first object is not null in type
 				if (firstObjectOfType != null)
@@ -443,7 +436,7 @@ namespace ShipMaid
 
 					// Two handed objects can be moved closer to the wall
 					if (twoHanded)
-						placementPosition.z += 0.5f;
+						placementPosition.z += 0.5f; 
 
 					foreach (var obj in objectsOfType)
 					{
@@ -457,7 +450,7 @@ namespace ShipMaid
 						// Choose how to organze each item of loot
 						if (ConfigSettings.OrganizationTechnique.Key.Value == "Value")
 						{
-							placementPosition.x += GetXOffsetFromScrapValue(obj, CalculateHighestScrapValue());
+							placementPosition.x += GetXOffsetFromScrapValue(obj, CalculateHighestScrapValue(hsh));
 							// If we already placed an item here, move it by a small amount to offset common values
 							while (offsetLocations.Contains(placementPosition.x))
 							{
@@ -471,10 +464,18 @@ namespace ShipMaid
 						}
 
 
+						if(!hsh.IsPositionInsideShip(placementPosition))
+						{
+							placementPosition = hsh.AdjustPositionWithinShip(placementPosition);
+						}
 						// Move the object if position needs adjusted
 						if (!SameLocation(obj.transform.position, placementPosition))
 						{
 							MakeObjectFallRpc(obj, placementPosition, true);
+							if(!hsh.IsObjectWithinShip(obj))
+							{
+								ShipMaid.Log($"Found item outside of the ship - {obj.name}");
+							}
 						}
 					}
 					itemCounter++;

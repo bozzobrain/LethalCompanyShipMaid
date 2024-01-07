@@ -16,7 +16,7 @@ namespace ShipMaid
 	{
 		private const string GUID = "ShipMaid";
 		private const string NAME = "ShipMaid";
-		private const string VERSION = "3.0.1";
+		private const string VERSION = "3.1.0";
 
 		public static ShipMaid instance;
 		private void Awake()
@@ -35,6 +35,10 @@ namespace ShipMaid
 		public static void Log(string message)
 		{
 			instance.Logger.LogInfo((object)message);
+		}
+		public static void LogError(string message)
+		{
+			instance.Logger.LogError((object)message);
 		}
 	}
 }
