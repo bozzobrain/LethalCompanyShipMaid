@@ -204,7 +204,7 @@ namespace ShipMaid
 		{
 			GameObject ship = GameObject.Find("/Environment/HangarShip");
 			Vector3 shiplocation = ship.transform.position;
-			shiplocation.z += -5.75f;
+			shiplocation.z += -6.25f;
 			shiplocation.x += -5.25f;
 			shiplocation.y += 1.66f;
 			return shiplocation;
@@ -218,9 +218,9 @@ namespace ShipMaid
 		{
 			float highestScrap = 0;
 
-			foreach(GrabbableObject obj in hsh.ObjectsInShip())
+			foreach (GrabbableObject obj in hsh.ObjectsInShip())
 			{
-				if(obj.scrapValue > highestScrap)
+				if (obj.scrapValue > highestScrap)
 				{
 					highestScrap = obj.scrapValue;
 				}
@@ -234,9 +234,9 @@ namespace ShipMaid
 		/// Scale the values by 3 units to group them but order by value
 		/// </summary>
 		/// <returns>Offset x value scaled by scrap value.</returns>
-		private static float GetXOffsetFromScrapValue(GrabbableObject obj, float highestScrapValue)
+		private static float GetXOffsetFromScrapValue(GrabbableObject obj, float highestScrapValue, float maxXOffset)
 		{
-			return ((obj.scrapValue - 10) / highestScrapValue) * 4;
+			return ((obj.scrapValue - 10) / highestScrapValue) * maxXOffset;
 		}
 
 
@@ -269,7 +269,7 @@ namespace ShipMaid
 		{
 			return NearLocation(pos1.x, pos2.x, 0.01f) && NearLocation(pos1.z, pos2.z, 0.01f);
 		}
-	
+
 		/// <summary>
 		/// Organizes the scrap in the storage closet.
 		/// </summary>
@@ -360,7 +360,7 @@ namespace ShipMaid
 			float frontOfShipXAreaOffset = 0;
 			float backOfShipAreaZOffset = 2.75f / objectNames.Count;
 			float backOfShipXAreaOffset = 7;
-
+			bool targetLocationFront = false;
 			float objectTypeZOffset = 0;
 			float twoHandedOffset = 0;
 			if (twoHanded)
@@ -369,6 +369,7 @@ namespace ShipMaid
 				{
 					twoHandedOffset = frontOfShipXAreaOffset;
 					objectTypeZOffset = frontOfShipAreaZOffset;
+					targetLocationFront = true;
 				}
 				else
 				{
@@ -387,6 +388,7 @@ namespace ShipMaid
 				{
 					twoHandedOffset = frontOfShipXAreaOffset;
 					objectTypeZOffset = frontOfShipAreaZOffset;
+					targetLocationFront = true;
 				}
 			}
 
@@ -417,12 +419,12 @@ namespace ShipMaid
 				if (ConfigSettings.OrganizationTechnique.Key.Value == "Stack")
 				{
 					System.Random r = new();
-					xPositionOffset = (float)r.NextDouble()*r.Next(-1,2);
+					xPositionOffset = (float)r.NextDouble() * r.Next(-1, 2);
 
 					// Force objects to the boundaries for debugging
 					//xPositionOffset = r.Next(-1,2);
 
-					if (ConfigSettings.ItemGrouping.Key.Value == "Loose") xPositionOffset *= 2.0f;   
+					if (ConfigSettings.ItemGrouping.Key.Value == "Loose") xPositionOffset *= 2.0f;
 				}
 				// Make sure first object is not null in type
 				if (firstObjectOfType != null)
@@ -434,9 +436,9 @@ namespace ShipMaid
 					else
 						placementPosition.z -= (objectTypeZOffset * itemCounter * 0.1f) + objectTypeZOffset * 0.9f * objectNames.Count;
 
-					// Two handed objects can be moved closer to the wall
-					if (twoHanded)
-						placementPosition.z += 0.5f; 
+					// Objects in back of shop can be moved closer to the wall
+					if (!targetLocationFront)
+						placementPosition.z += 0.5f;
 
 					foreach (var obj in objectsOfType)
 					{
@@ -450,7 +452,15 @@ namespace ShipMaid
 						// Choose how to organze each item of loot
 						if (ConfigSettings.OrganizationTechnique.Key.Value == "Value")
 						{
-							placementPosition.x += GetXOffsetFromScrapValue(obj, CalculateHighestScrapValue(hsh));
+							if (targetLocationFront)
+							{
+								placementPosition.x += GetXOffsetFromScrapValue(obj, CalculateHighestScrapValue(hsh),2.5f);
+							}
+							else
+							{
+								placementPosition.x += GetXOffsetFromScrapValue(obj, CalculateHighestScrapValue(hsh),4f);
+
+							}
 							// If we already placed an item here, move it by a small amount to offset common values
 							while (offsetLocations.Contains(placementPosition.x))
 							{
@@ -464,7 +474,7 @@ namespace ShipMaid
 						}
 
 
-						if(!hsh.IsPositionInsideShip(placementPosition))
+						if (!hsh.IsPositionInsideShip(placementPosition))
 						{
 							placementPosition = hsh.AdjustPositionWithinShip(placementPosition);
 						}
@@ -472,7 +482,7 @@ namespace ShipMaid
 						if (!SameLocation(obj.transform.position, placementPosition))
 						{
 							MakeObjectFallRpc(obj, placementPosition, true);
-							if(!hsh.IsObjectWithinShip(obj))
+							if (!hsh.IsObjectWithinShip(obj))
 							{
 								ShipMaid.Log($"Found item outside of the ship - {obj.name}");
 							}

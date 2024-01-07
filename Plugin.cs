@@ -16,7 +16,7 @@ namespace ShipMaid
 	{
 		private const string GUID = "ShipMaid";
 		private const string NAME = "ShipMaid";
-		private const string VERSION = "3.1.0";
+		private const string VERSION = "3.1.1";
 
 		public static ShipMaid instance;
 		private void Awake()
