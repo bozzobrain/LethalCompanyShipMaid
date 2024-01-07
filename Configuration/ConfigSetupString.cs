@@ -1,7 +1,5 @@
 ﻿using BepInEx.Configuration;
-using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace ShipMaid.Configuration
 {
@@ -10,6 +8,7 @@ namespace ShipMaid.Configuration
 		public ConfigSetupString()
 		{
 		}
+
 		public string pluginName;
 		public string SettingName;
 		public string SettingValue;
@@ -21,6 +20,7 @@ namespace ShipMaid.Configuration
 			toDictionary.Add(Key.Definition.Key, (ConfigEntryBase)(object)Key);
 			return toDictionary;
 		}
+
 		public ConfigEntry<string> Key;
 		public string KeyDisplayName;
 
@@ -28,6 +28,5 @@ namespace ShipMaid.Configuration
 		{
 			return ShipMaid.instance.Config.Bind(c.pluginName, c.SettingName, c.SettingValue, c.SettingDescription);
 		}
-
 	}
 }

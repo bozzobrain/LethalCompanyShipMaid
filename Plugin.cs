@@ -1,24 +1,28 @@
 ﻿using BepInEx;
-using BepInEx.Logging;
-using Dissonance;
-using GameNetcodeStuff;
 using HarmonyLib;
 using ShipMaid.Configuration;
-using System;
 using System.Reflection;
-using Unity.Netcode;
 
 namespace ShipMaid
 {
-
-    [BepInPlugin(GUID, NAME, VERSION)]
+	[BepInPlugin(GUID, NAME, VERSION)]
 	internal class ShipMaid : BaseUnityPlugin
 	{
+		public static ShipMaid instance;
 		private const string GUID = "ShipMaid";
 		private const string NAME = "ShipMaid";
 		private const string VERSION = "3.1.1";
 
-		public static ShipMaid instance;
+		public static void Log(string message)
+		{
+			instance.Logger.LogInfo((object)message);
+		}
+
+		public static void LogError(string message)
+		{
+			instance.Logger.LogError((object)message);
+		}
+
 		private void Awake()
 		{
 			instance = this;
@@ -29,16 +33,6 @@ namespace ShipMaid
 
 			Harmony harmony = new Harmony(GUID);
 			harmony.PatchAll(Assembly.GetExecutingAssembly());
-
-
-		}
-		public static void Log(string message)
-		{
-			instance.Logger.LogInfo((object)message);
-		}
-		public static void LogError(string message)
-		{
-			instance.Logger.LogError((object)message);
 		}
 	}
 }

@@ -1,7 +1,5 @@
 ﻿using BepInEx.Configuration;
-using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace ShipMaid.Configuration
 {
@@ -10,6 +8,7 @@ namespace ShipMaid.Configuration
 		public ConfigSetupInputAction()
 		{
 		}
+
 		public string pluginName;
 		public string ActionName;
 		public string KeyboardMapping;
@@ -20,12 +19,14 @@ namespace ShipMaid.Configuration
 			Key = CreateKey(this);
 			KeyDisplayName = GetDisplayName(Key.Value);
 		}
+
 		public Dictionary<string, ConfigEntryBase> Bind(Dictionary<string, ConfigEntryBase> toDictionary)
 		{
 			Key = CreateKey(this);
 			toDictionary.Add(Key.Definition.Key, (ConfigEntryBase)(object)Key);
 			return toDictionary;
 		}
+
 		public ConfigEntry<string> Key;
 		public string KeyDisplayName;
 
@@ -33,6 +34,7 @@ namespace ShipMaid.Configuration
 		{
 			return ShipMaid.instance.Config.Bind(c.pluginName, c.ActionName, c.KeyboardMapping, c.ActionDescription);
 		}
+
 		public static string GetDisplayName(string key)
 		{
 			key = key.Replace("<Keyboard>/", "");

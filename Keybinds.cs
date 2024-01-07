@@ -1,63 +1,59 @@
 ﻿using GameNetcodeStuff;
 using HarmonyLib;
-using System.Collections.Generic;
-using System.Text;
-using static UnityEngine.InputSystem.InputAction;
-using Unity.Netcode;
-using UnityEngine.InputSystem;
-using UnityEngine;
 using ShipMaid.Configuration;
+using UnityEngine;
+using UnityEngine.InputSystem;
+using static UnityEngine.InputSystem.InputAction;
 
 namespace ShipMaid
 {
-    [HarmonyPatch]
-    internal static class Keybinds
-    {
-        public static PlayerControllerB localPlayerController;
+	[HarmonyPatch]
+	internal static class Keybinds
+	{
+		public static PlayerControllerB localPlayerController;
 
-        private static InputAction shipMaidCleanupShip;
-        private static InputAction shipMaidCleanupCloset;
+		private static InputAction shipMaidCleanupShip;
+		private static InputAction shipMaidCleanupCloset;
 
 		[HarmonyPatch(typeof(PlayerControllerB), "ConnectClientToPlayerObject")]
-        [HarmonyPostfix]
-        public static void OnLocalPlayerConnect(PlayerControllerB __instance)
-        {
-            localPlayerController = __instance;
-            shipMaidCleanupShip = new InputAction(null, 0, ConfigSettings.ShipMaidShipCleanupInputAction.Key.Value, "Press", null, null);
-            shipMaidCleanupCloset = new InputAction(null, 0, ConfigSettings.ShipMaidClosetCleanupInputAction.Key.Value, "Press", null, null);
+		[HarmonyPostfix]
+		public static void OnLocalPlayerConnect(PlayerControllerB __instance)
+		{
+			localPlayerController = __instance;
+			shipMaidCleanupShip = new InputAction(null, 0, ConfigSettings.ShipMaidShipCleanupInputAction.Key.Value, "Press", null, null);
+			shipMaidCleanupCloset = new InputAction(null, 0, ConfigSettings.ShipMaidClosetCleanupInputAction.Key.Value, "Press", null, null);
 
 			if (localPlayerController.gameObject.activeSelf)
-            {
-                SubscribeToEvents();
-            }
-        }
+			{
+				SubscribeToEvents();
+			}
+		}
 
-        private static void SubscribeToEvents()
-        {
-            if (shipMaidCleanupShip != null)
-            {
-                shipMaidCleanupShip.Enable();
-                shipMaidCleanupCloset.Enable();
+		private static void SubscribeToEvents()
+		{
+			if (shipMaidCleanupShip != null)
+			{
+				shipMaidCleanupShip.Enable();
+				shipMaidCleanupCloset.Enable();
 
 				shipMaidCleanupShip.performed += OnShipMaidShipCleanupCalled;
-                shipMaidCleanupCloset.performed += OnShipMaidClosetCleanupCalled;
-
+				shipMaidCleanupCloset.performed += OnShipMaidClosetCleanupCalled;
 			}
-        }
+		}
 
-        [HarmonyPatch(typeof(PlayerControllerB), "OnEnable")]
-        [HarmonyPostfix]
-        public static void OnEnable(PlayerControllerB __instance)
-        {
-            if ((Object)(object)__instance == (Object)(object)localPlayerController)
-            {
-                SubscribeToEvents();
-            }
-        }
+		[HarmonyPatch(typeof(PlayerControllerB), "OnEnable")]
+		[HarmonyPostfix]
+		public static void OnEnable(PlayerControllerB __instance)
+		{
+			if ((Object)(object)__instance == (Object)(object)localPlayerController)
+			{
+				SubscribeToEvents();
+			}
+		}
 
-        [HarmonyPatch(typeof(PlayerControllerB), "OnDisable")]
-        [HarmonyPostfix]
-        public static void OnDisable(PlayerControllerB __instance)
+		[HarmonyPatch(typeof(PlayerControllerB), "OnDisable")]
+		[HarmonyPostfix]
+		public static void OnDisable(PlayerControllerB __instance)
 		{
 			if (shipMaidCleanupShip != null && !((Object)(object)__instance != (Object)(object)localPlayerController))
 			{
@@ -81,6 +77,7 @@ namespace ShipMaid
 
 			ShipMaidFunctions.OrganizeShipLoot();
 		}
+
 		private static void OnShipMaidClosetCleanupCalled(CallbackContext context)
 		{
 			if ((Object)(object)localPlayerController == null || !localPlayerController.isPlayerControlled || localPlayerController.inTerminalMenu || localPlayerController.IsServer && !localPlayerController.isHostPlayerObject)
@@ -92,5 +89,4 @@ namespace ShipMaid
 			ShipMaidFunctions.OrganizeStorageCloset();
 		}
 	}
-
 }

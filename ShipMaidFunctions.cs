@@ -1,90 +1,18 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Reflection;
-using Discord;
-using GameNetcodeStuff;
+﻿using GameNetcodeStuff;
 using HarmonyLib;
 using ShipMaid.Configuration;
 using ShipMaid.EntityHelpers;
-using ShipMaid.Patchers;
-using TMPro;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using Unity.Netcode;
-using Unity.Netcode.Components;
 using UnityEngine;
-using UnityEngine.InputSystem;
-using UnityEngine.SceneManagement;
-using UnityEngine.UIElements;
-using static UnityEngine.GraphicsBuffer;
 using NetworkManager = Unity.Netcode.NetworkManager;
-using Object = UnityEngine.Object;
 
 namespace ShipMaid
 {
-
 	public class NetworkingObjectManager : NetworkBehaviour
 	{
-		[ServerRpc]
-		public void MakeObjectFallServerRpc(NetworkObjectReference obj, Vector3 placementPosition, bool shipParent)
-		{
-			NetworkManager networkManager = base.NetworkManager;
-			if ((object)networkManager == null || !networkManager.IsListening)
-			{
-				return;
-			}
-
-			if (base.OwnerClientId != networkManager.LocalClientId)
-			{
-				if (networkManager.LogLevel <= Unity.Netcode.LogLevel.Normal)
-				{
-					Debug.LogError("Only the owner can invoke a ServerRpc that requires ownership!");
-				}
-
-				return;
-			}
-
-			FastBufferWriter bufferWriter = new FastBufferWriter(256, Unity.Collections.Allocator.Temp);
-			bufferWriter.WriteValueSafe(in obj, default(FastBufferWriter.ForNetworkSerializable));
-			bufferWriter.WriteValueSafe(placementPosition);
-			bufferWriter.WriteValueSafe(shipParent);
-			NetworkManager.Singleton.CustomMessagingManager.SendNamedMessageToAll("MakeObjectFall", bufferWriter, NetworkDelivery.Reliable);
-
-			if (obj.TryGet(out var networkObject))
-			{
-				GrabbableObject component = networkObject.GetComponent<GrabbableObject>();
-				if (!base.IsOwner)
-				{
-					MakeObjectFall(component, placementPosition, shipParent);
-				}
-			}
-		}
-		[ClientRpc]
-		public void MakeObjectFallClientRpc(NetworkObjectReference obj, Vector3 placementPosition, bool shipParent)
-		{
-			NetworkManager networkManager = base.NetworkManager;
-			if ((object)networkManager == null || !networkManager.IsListening)
-			{
-				return;
-			}
-
-			FastBufferWriter bufferWriter = new FastBufferWriter(256, Unity.Collections.Allocator.Temp);
-			bufferWriter.WriteValueSafe(in obj, default(FastBufferWriter.ForNetworkSerializable));
-			bufferWriter.WriteValueSafe(in placementPosition);
-			bufferWriter.WriteValueSafe(shipParent);
-			NetworkManager.Singleton.CustomMessagingManager.SendNamedMessageToAll("MakeObjectFall", bufferWriter, NetworkDelivery.Reliable);
-
-			if (obj.TryGet(out var networkObject))
-			{
-				GrabbableObject component = networkObject.GetComponent<GrabbableObject>();
-				if (!base.IsOwner)
-				{
-					MakeObjectFall(component, placementPosition, shipParent);
-				}
-			}
-		}
-
 		public void MakeObjectFall(GrabbableObject obj, Vector3 placementPosition, bool shipParent)
 		{
 			GameObject ship = GameObject.Find("/Environment/HangarShip");
@@ -118,28 +46,91 @@ namespace ShipMaid
 		}
 
 		[ClientRpc]
+		public void MakeObjectFallClientRpc(NetworkObjectReference obj, Vector3 placementPosition, bool shipParent)
+		{
+			NetworkManager networkManager = base.NetworkManager;
+			if ((object)networkManager == null || !networkManager.IsListening)
+			{
+				return;
+			}
+
+			FastBufferWriter bufferWriter = new FastBufferWriter(256, Unity.Collections.Allocator.Temp);
+			bufferWriter.WriteValueSafe(in obj, default(FastBufferWriter.ForNetworkSerializable));
+			bufferWriter.WriteValueSafe(in placementPosition);
+			bufferWriter.WriteValueSafe(shipParent);
+			NetworkManager.Singleton.CustomMessagingManager.SendNamedMessageToAll("MakeObjectFall", bufferWriter, NetworkDelivery.Reliable);
+
+			if (obj.TryGet(out var networkObject))
+			{
+				GrabbableObject component = networkObject.GetComponent<GrabbableObject>();
+				if (!base.IsOwner)
+				{
+					MakeObjectFall(component, placementPosition, shipParent);
+				}
+			}
+		}
+
+		[ServerRpc]
+		public void MakeObjectFallServerRpc(NetworkObjectReference obj, Vector3 placementPosition, bool shipParent)
+		{
+			NetworkManager networkManager = base.NetworkManager;
+			if ((object)networkManager == null || !networkManager.IsListening)
+			{
+				return;
+			}
+
+			if (base.OwnerClientId != networkManager.LocalClientId)
+			{
+				if (networkManager.LogLevel <= Unity.Netcode.LogLevel.Normal)
+				{
+					Debug.LogError("Only the owner can invoke a ServerRpc that requires ownership!");
+				}
+				return;
+			}
+
+			FastBufferWriter bufferWriter = new FastBufferWriter(256, Unity.Collections.Allocator.Temp);
+			bufferWriter.WriteValueSafe(in obj, default(FastBufferWriter.ForNetworkSerializable));
+			bufferWriter.WriteValueSafe(placementPosition);
+			bufferWriter.WriteValueSafe(shipParent);
+			NetworkManager.Singleton.CustomMessagingManager.SendNamedMessageToAll("MakeObjectFall", bufferWriter, NetworkDelivery.Reliable);
+
+			if (obj.TryGet(out var networkObject))
+			{
+				GrabbableObject component = networkObject.GetComponent<GrabbableObject>();
+				if (!base.IsOwner)
+				{
+					MakeObjectFall(component, placementPosition, shipParent);
+				}
+			}
+		}
+
+		[ClientRpc]
 		public void RunClientRpc(NetworkObjectReference obj, Vector3 placementPosition, bool shipParent)
 		{
 			MakeObjectFallServerRpc(obj, placementPosition, shipParent);
 		}
 	}
+
 	[HarmonyPatch]
 	internal class ShipMaidFunctions
 	{
-		static List<string> ItemsForStorageCloset = ConfigSettings.ClosetLocationOverride.GetStrings(ConfigSettings.ClosetLocationOverride.Key.Value);
-		static List<string> SortingBlacklist = ConfigSettings.SortingLocationBlacklist.GetStrings(ConfigSettings.SortingLocationBlacklist.Key.Value);
-
 		// Wanted a reference to the player object
 		public static PlayerControllerB localPlayerController;
 
-		[HarmonyPatch(typeof(PlayerControllerB), "ConnectClientToPlayerObject")]
-		[HarmonyPostfix]
-		public static void OnLocalPlayerConnect(PlayerControllerB __instance)
+		private static List<string> ItemsForStorageCloset = ConfigSettings.ClosetLocationOverride.GetStrings(ConfigSettings.ClosetLocationOverride.Key.Value);
+		private static List<string> SortingBlacklist = ConfigSettings.SortingLocationBlacklist.GetStrings(ConfigSettings.SortingLocationBlacklist.Key.Value);
+
+		public static NetworkingObjectManager GetNetworkingObjectManager()
 		{
-			localPlayerController = __instance;
-			if (localPlayerController.IsClient)
-				NetworkManagerInit();
+			GameObject terminal = GameObject.Find("/Environment/HangarShip/Terminal");
+			if (terminal != null)
+			{
+				ShipMaid.Log($"Terminal found {terminal.name}");
+				return terminal.GetComponentInChildren<NetworkingObjectManager>();
+			}
+			return null;
 		}
+
 		public static void MakeObjectFallRpc(GrabbableObject obj, Vector3 placementPosition, bool shipParent)
 		{
 			var pni = GetNetworkingObjectManager();
@@ -153,17 +144,6 @@ namespace ShipMaid
 			{
 				ShipMaid.Log($"NetworkingObjectManager not found ");
 			}
-		}
-
-		public static NetworkingObjectManager GetNetworkingObjectManager()
-		{
-			GameObject terminal = GameObject.Find("/Environment/HangarShip/Terminal");
-			if (terminal != null)
-			{
-				ShipMaid.Log($"Terminal found {terminal.name}");
-				return terminal.GetComponentInChildren<NetworkingObjectManager>();
-			}
-			return null;
 		}
 
 		public static void NetworkManagerInit()
@@ -186,123 +166,19 @@ namespace ShipMaid
 			});
 		}
 
-		/// <summary>
-		/// Get position of the ship.
-		/// </summary>
-		/// <returns>Vector3 position of ship.</returns>
-		private static Vector3 GetShipLocation()
+		[HarmonyPatch(typeof(PlayerControllerB), "ConnectClientToPlayerObject")]
+		[HarmonyPostfix]
+		public static void OnLocalPlayerConnect(PlayerControllerB __instance)
 		{
-			GameObject ship = GameObject.Find("/Environment/HangarShip");
-			return ship.transform.position;
+			localPlayerController = __instance;
+			if (localPlayerController.IsClient)
+				NetworkManagerInit();
 		}
 
-		/// <summary>
-		/// Get position inside of the ship for object placement.
-		/// </summary>
-		/// <returns>Vector3 position of ship to place objects.</returns>
-		private static Vector3 GetShipCenterLocation()
-		{
-			GameObject ship = GameObject.Find("/Environment/HangarShip");
-			Vector3 shiplocation = ship.transform.position;
-			shiplocation.z += -6.25f;
-			shiplocation.x += -5.25f;
-			shiplocation.y += 1.66f;
-			return shiplocation;
-		}
-
-		/// <summary>
-		/// Get the highest value of the loot in the ship.
-		/// </summary>
-		/// <returns>The value of the highest valued loot on the ship.</returns>
-		private static float CalculateHighestScrapValue(HangarShipHelper hsh)
-		{
-			float highestScrap = 0;
-
-			foreach (GrabbableObject obj in hsh.ObjectsInShip())
-			{
-				if (obj.scrapValue > highestScrap)
-				{
-					highestScrap = obj.scrapValue;
-				}
-			}
-
-			return highestScrap;
-		}
-
-		/// <summary>
-		/// Get a value of x offset for a given scrap. Higher values have higher x offsets.
-		/// Scale the values by 3 units to group them but order by value
-		/// </summary>
-		/// <returns>Offset x value scaled by scrap value.</returns>
-		private static float GetXOffsetFromScrapValue(GrabbableObject obj, float highestScrapValue, float maxXOffset)
-		{
-			return ((obj.scrapValue - 10) / highestScrapValue) * maxXOffset;
-		}
-
-
-		/// <summary>
-		/// Get a list of all scrap in the ship.
-		/// </summary>
-		/// <returns>List of all scrap in ship.</returns>
-		private static void ReportScrapList(string where)
-		{
-			if (where == "ship")
-			{
-				HangarShipHelper hsh = new();
-				var shipObjects = hsh.ObjectsInShip();
-				shipObjects.Do(scrap => ShipMaid.Log($"{scrap.name} - ${scrap.scrapValue} - ${scrap.targetFloorPosition.x}- ${scrap.targetFloorPosition.y}- ${scrap.targetFloorPosition.z}"));
-			}
-			else if (where == "closet")
-			{
-				StorageClosetHelper sch = new();
-				var closetObjects = sch.GetObjectsInStorageCloset();
-				closetObjects.Do(scrap => ShipMaid.Log($"{scrap.name} - ${scrap.scrapValue} - ${scrap.targetFloorPosition.x}- ${scrap.targetFloorPosition.y}- ${scrap.targetFloorPosition.z}"));
-			}
-		}
-
-		private static bool NearLocation(float f1, float f2, float offset)
-		{
-			return f1 < f2 + offset && f1 > f2 - offset;
-		}
-
-		private static bool SameLocation(Vector3 pos1, Vector3 pos2)
-		{
-			return NearLocation(pos1.x, pos2.x, 0.01f) && NearLocation(pos1.z, pos2.z, 0.01f);
-		}
-
-		/// <summary>
-		/// Organizes the scrap in the storage closet.
-		/// </summary>
-		/// 
-		public static void OrganizeStorageCloset()
-		{
-			var sch = new StorageClosetHelper();
-			var storageClosetObjects = sch.GetObjectsInStorageCloset();
-			List<string> objectNames = new List<string>();
-			foreach (var scrap in storageClosetObjects)
-			{
-				if (!objectNames.Contains(scrap.name))
-				{
-					objectNames.Add(scrap.name);
-				}
-			}
-			foreach (var objectType in objectNames)
-			{
-				var objectsOfType = storageClosetObjects.Where(obj => obj.name.Contains(objectType)).ToList();
-
-				// Make sure this item is not being held currently
-				var firstObjectOfType = objectsOfType.FirstOrDefault(obj => !obj.isHeld);
-
-				if (firstObjectOfType != null)
-				{
-					sch.PlaceStorageObjectOnShelve(objectsOfType);
-				}
-			}
-		}
 		/// <summary>
 		/// Organizes the scrap in the ship.
 		/// </summary>
-		/// 
+		///
 		public static void OrganizeShipLoot()
 		{
 			var sch = new StorageClosetHelper();
@@ -338,6 +214,93 @@ namespace ShipMaid
 			OrganizeItems(sch, twoHandedObjects, true);
 		}
 
+		/// <summary>
+		/// Organizes the scrap in the storage closet.
+		/// </summary>
+		///
+		public static void OrganizeStorageCloset()
+		{
+			var sch = new StorageClosetHelper();
+			var storageClosetObjects = sch.GetObjectsInStorageCloset();
+			List<string> objectNames = new List<string>();
+			foreach (var scrap in storageClosetObjects)
+			{
+				if (!objectNames.Contains(scrap.name))
+				{
+					objectNames.Add(scrap.name);
+				}
+			}
+			foreach (var objectType in objectNames)
+			{
+				var objectsOfType = storageClosetObjects.Where(obj => obj.name.Contains(objectType)).ToList();
+
+				// Make sure this item is not being held currently
+				var firstObjectOfType = objectsOfType.FirstOrDefault(obj => !obj.isHeld);
+
+				if (firstObjectOfType != null)
+				{
+					sch.PlaceStorageObjectOnShelve(objectsOfType);
+				}
+			}
+		}
+
+		/// <summary>
+		/// Get the highest value of the loot in the ship.
+		/// </summary>
+		/// <returns>The value of the highest valued loot on the ship.</returns>
+		private static float CalculateHighestScrapValue(HangarShipHelper hsh)
+		{
+			float highestScrap = 0;
+
+			foreach (GrabbableObject obj in hsh.ObjectsInShip())
+			{
+				if (obj.scrapValue > highestScrap)
+				{
+					highestScrap = obj.scrapValue;
+				}
+			}
+
+			return highestScrap;
+		}
+
+		/// <summary>
+		/// Get position inside of the ship for object placement.
+		/// </summary>
+		/// <returns>Vector3 position of ship to place objects.</returns>
+		private static Vector3 GetShipCenterLocation()
+		{
+			GameObject ship = GameObject.Find("/Environment/HangarShip");
+			Vector3 shiplocation = ship.transform.position;
+			shiplocation.z += -6.25f;
+			shiplocation.x += -5.25f;
+			shiplocation.y += 1.66f;
+			return shiplocation;
+		}
+
+		/// <summary>
+		/// Get position of the ship.
+		/// </summary>
+		/// <returns>Vector3 position of ship.</returns>
+		private static Vector3 GetShipLocation()
+		{
+			GameObject ship = GameObject.Find("/Environment/HangarShip");
+			return ship.transform.position;
+		}
+
+		/// <summary>
+		/// Get a value of x offset for a given scrap. Higher values have higher x offsets.
+		/// Scale the values by 3 units to group them but order by value
+		/// </summary>
+		/// <returns>Offset x value scaled by scrap value.</returns>
+		private static float GetXOffsetFromScrapValue(GrabbableObject obj, float highestScrapValue, float maxXOffset)
+		{
+			return ((obj.scrapValue - 10) / highestScrapValue) * maxXOffset;
+		}
+
+		private static bool NearLocation(float f1, float f2, float offset)
+		{
+			return f1 < f2 + offset && f1 > f2 - offset;
+		}
 
 		private static void OrganizeItems(StorageClosetHelper sch, List<GrabbableObject> objects, bool twoHanded)
 		{
@@ -353,8 +316,8 @@ namespace ShipMaid
 			}
 			float xPositionOffset = 0;
 
-			// Organize two handed object in a different location than single handed				
-			// Single handed objects are closer to the door				
+			// Organize two handed object in a different location than single handed
+			// Single handed objects are closer to the door
 			// calculate a z offset that places objects on different z location by type
 			float frontOfShipAreaZOffset = 2.25f / objectNames.Count;
 			float frontOfShipXAreaOffset = 0;
@@ -454,12 +417,11 @@ namespace ShipMaid
 						{
 							if (targetLocationFront)
 							{
-								placementPosition.x += GetXOffsetFromScrapValue(obj, CalculateHighestScrapValue(hsh),2.5f);
+								placementPosition.x += GetXOffsetFromScrapValue(obj, CalculateHighestScrapValue(hsh), 2.5f);
 							}
 							else
 							{
-								placementPosition.x += GetXOffsetFromScrapValue(obj, CalculateHighestScrapValue(hsh),4f);
-
+								placementPosition.x += GetXOffsetFromScrapValue(obj, CalculateHighestScrapValue(hsh), 4f);
 							}
 							// If we already placed an item here, move it by a small amount to offset common values
 							while (offsetLocations.Contains(placementPosition.x))
@@ -472,7 +434,6 @@ namespace ShipMaid
 						{
 							placementPosition.x += xPositionOffset;
 						}
-
 
 						if (!hsh.IsPositionInsideShip(placementPosition))
 						{
@@ -493,6 +454,31 @@ namespace ShipMaid
 			}
 			// TODO - This seems like a hacky approach (double movement)
 			OrganizeStorageCloset();
+		}
+
+		/// <summary>
+		/// Get a list of all scrap in the ship.
+		/// </summary>
+		/// <returns>List of all scrap in ship.</returns>
+		private static void ReportScrapList(string where)
+		{
+			if (where == "ship")
+			{
+				HangarShipHelper hsh = new();
+				var shipObjects = hsh.ObjectsInShip();
+				shipObjects.Do(scrap => ShipMaid.Log($"{scrap.name} - ${scrap.scrapValue} - ${scrap.targetFloorPosition.x}- ${scrap.targetFloorPosition.y}- ${scrap.targetFloorPosition.z}"));
+			}
+			else if (where == "closet")
+			{
+				StorageClosetHelper sch = new();
+				var closetObjects = sch.GetObjectsInStorageCloset();
+				closetObjects.Do(scrap => ShipMaid.Log($"{scrap.name} - ${scrap.scrapValue} - ${scrap.targetFloorPosition.x}- ${scrap.targetFloorPosition.y}- ${scrap.targetFloorPosition.z}"));
+			}
+		}
+
+		private static bool SameLocation(Vector3 pos1, Vector3 pos2)
+		{
+			return NearLocation(pos1.x, pos2.x, 0.01f) && NearLocation(pos1.z, pos2.z, 0.01f);
 		}
 	}
 }
