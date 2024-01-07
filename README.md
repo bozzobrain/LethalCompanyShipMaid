@@ -56,6 +56,12 @@ A mod where the ship and the storage closet is cleaned up when you ~~scan~~ pres
 
 
 # Changes
+- V3.0.1
+	- Fixes
+		- Fixed a bug where modified scrap levels would teleport outside of ship when sorted by value
+	- Features
+		- Added a blacklist to sorting (Thanks to [nontheoretical](https://github.com/nontheoretical) for the suggestion)
+		 
 - V3.0.0
 	- Introduced a configuration system that will allow the customization and tailoring of the mod to your liking
 	- Began working on ship storage closet functionality now that the ship functionality is ironing out.
