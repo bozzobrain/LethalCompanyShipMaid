@@ -1,6 +1,11 @@
 # LethalCompanyShipMaid
 A mod where the ship and the storage closet is cleaned up when you ~~scan~~ press the associated keybinding within the ship.
 
+# Usage
+- Press 'm' to cleanup the ship
+- Press 'n' to cleanup the storage closet
+- Make sure that any players that you play with also have the mod installed for them to see the organized loot change positions.
+
 # Features
 ## Basics
 - Keypresses will organize each item type in groups by the name of the item
@@ -9,6 +14,7 @@ A mod where the ship and the storage closet is cleaned up when you ~~scan~~ pres
 	- Items are grouped in two locations, one group closest to the door are single handed items. The group futher from the door are two handed objects.
   - Closet cleanup default keybinding is 'n'
 	- Items in the closet will be staggered slightly to the right of the 'first' item
+
 ## Config File Parameters
 - CleanupShipKey
 	- Keypress used to cleanup the ship only
