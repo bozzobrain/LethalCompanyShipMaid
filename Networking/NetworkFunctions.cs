@@ -40,7 +40,7 @@ namespace ShipMaid.Networking
 			public static void NetworkManagerInit()
 			{
 				ShipMaid.Log("Registering named message");
-				NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("MakeObjectFallShipMaid", (senderClientId, reader) =>
+				NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("MakeObjectFall", (senderClientId, reader) =>
 				{
 					if (senderClientId != localPlayerController.playerClientId)
 					{
@@ -114,7 +114,7 @@ namespace ShipMaid.Networking
 				bufferWriter.WriteValueSafe(in obj, default);
 				bufferWriter.WriteValueSafe(in placementPosition);
 				bufferWriter.WriteValueSafe(shipParent);
-				NetworkManager.Singleton.CustomMessagingManager.SendNamedMessageToAll("MakeObjectFallShipMaid", bufferWriter, NetworkDelivery.Reliable);
+				NetworkManager.Singleton.CustomMessagingManager.SendNamedMessageToAll("MakeObjectFall", bufferWriter, NetworkDelivery.Reliable);
 
 				if (obj.TryGet(out var networkObject))
 				{
@@ -149,7 +149,7 @@ namespace ShipMaid.Networking
 				bufferWriter.WriteValueSafe(in obj, default);
 				bufferWriter.WriteValueSafe(placementPosition);
 				bufferWriter.WriteValueSafe(shipParent);
-				NetworkManager.Singleton.CustomMessagingManager.SendNamedMessageToAll("MakeObjectFallShipMaid", bufferWriter, NetworkDelivery.Reliable);
+				NetworkManager.Singleton.CustomMessagingManager.SendNamedMessageToAll("MakeObjectFall", bufferWriter, NetworkDelivery.Reliable);
 
 				if (obj.TryGet(out var networkObject))
 				{

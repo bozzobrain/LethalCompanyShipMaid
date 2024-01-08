@@ -21,7 +21,7 @@ namespace ShipMaid.Configuration
 			pluginName = "ShipMaid",
 			SettingName = "ItemGrouping",
 			SettingValue = "Tight",
-			SettingDescription = "[Loose] or [Tight]",
+			SettingDescription = "[Loose] Spread items accross the ship from left to right -or- [Tight] Pack the items to the side of the ship with the suit rack.",
 		};
 
 		public static ConfigSetupString OrganizationTechnique = new ConfigSetupString()
@@ -29,7 +29,7 @@ namespace ShipMaid.Configuration
 			pluginName = "ShipMaid",
 			SettingName = "OrganizationMethod",
 			SettingValue = "Value",
-			SettingDescription = "Choose organization method, spread by [Value] or [Stack] perfectly.",
+			SettingDescription = "Choose organization method, spread items of a type by [Value] or [Stack] perfectly by item type.",
 		};
 
 		public static ConfigSetupInputAction ShipMaidClosetCleanupInputAction = new ConfigSetupInputAction()
