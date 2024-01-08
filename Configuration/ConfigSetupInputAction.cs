@@ -5,30 +5,21 @@ namespace ShipMaid.Configuration
 {
 	public class ConfigSetupInputAction
 	{
+		public string ActionDescription;
+
+		public string ActionName;
+
+		public ConfigEntry<string> Key;
+
+		public string KeyboardMapping;
+
+		public string KeyDisplayName;
+
+		public string pluginName;
+
 		public ConfigSetupInputAction()
 		{
 		}
-
-		public string pluginName;
-		public string ActionName;
-		public string KeyboardMapping;
-		public string ActionDescription;
-
-		public void Bind()
-		{
-			Key = CreateKey(this);
-			KeyDisplayName = GetDisplayName(Key.Value);
-		}
-
-		public Dictionary<string, ConfigEntryBase> Bind(Dictionary<string, ConfigEntryBase> toDictionary)
-		{
-			Key = CreateKey(this);
-			toDictionary.Add(Key.Definition.Key, (ConfigEntryBase)(object)Key);
-			return toDictionary;
-		}
-
-		public ConfigEntry<string> Key;
-		public string KeyDisplayName;
 
 		public static ConfigEntry<string> CreateKey(ConfigSetupInputAction c)
 		{
@@ -49,6 +40,19 @@ namespace ShipMaid.Configuration
 			text = text.Replace("leftButton", "LMB");
 			text = text.Replace("rightButton", "RMB");
 			return text.Replace("middleButton", "MMB");
+		}
+
+		public void Bind()
+		{
+			Key = CreateKey(this);
+			KeyDisplayName = GetDisplayName(Key.Value);
+		}
+
+		public Dictionary<string, ConfigEntryBase> Bind(Dictionary<string, ConfigEntryBase> toDictionary)
+		{
+			Key = CreateKey(this);
+			toDictionary.Add(Key.Definition.Key, (ConfigEntryBase)(object)Key);
+			return toDictionary;
 		}
 	}
 }

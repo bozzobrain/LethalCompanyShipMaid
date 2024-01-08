@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using ShipMaid.HelperFunctions;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using static ShipMaid.Networking.NetworkFunctions;
 
 namespace ShipMaid.EntityHelpers
 {
@@ -8,18 +10,13 @@ namespace ShipMaid.EntityHelpers
 	{
 		public static Vector3 ClosetBoundsMax;
 		public static Vector3 ClosetBoundsMin;
-		public static float xMax;
-		public static float xMin;
 		private const float StorageLocationDoorOffsetToShelve = 0.2f;
 		private string LastItemPlaced = string.Empty;
 		private Vector3 LeftDoor;
 		private float placementLocationX;
 		private Vector3 RightDoor;
-		private Vector3 Shelve1Center;
-		private Vector3 Shelve2Center;
-		private Vector3 Shelve3Center;
-		private Vector3 Shelve4Center;
 		private int shelveToPlaceOn = 1;
+		private List<Vector3> ShevleListCenter = new List<Vector3>();
 		private GameObject StorageCloset;
 		private float StorageLocationXEnd;
 		private float StorageLocationXStart;
@@ -41,64 +38,17 @@ namespace ShipMaid.EntityHelpers
 			StorageLocationXStart = LeftDoor.x + StorageLocationDoorOffsetToShelve;
 			StorageLocationXEnd = RightDoor.x - StorageLocationDoorOffsetToShelve;
 
-			Shelve1Center = new((LeftDoor.x + RightDoor.x) / 2, 0.75f, LeftDoor.z);
-			Shelve2Center = new((LeftDoor.x + RightDoor.x) / 2, 1.4f, LeftDoor.z);
-			Shelve3Center = new((LeftDoor.x + RightDoor.x) / 2, 2f, LeftDoor.z);
-			Shelve4Center = new((LeftDoor.x + RightDoor.x) / 2, 2.5f, LeftDoor.z);
+			ShevleListCenter.Add(new((LeftDoor.x + RightDoor.x) / 2, 0.75f, LeftDoor.z));
+			ShevleListCenter.Add(new((LeftDoor.x + RightDoor.x) / 2, 1.4f, LeftDoor.z));
+			ShevleListCenter.Add(new((LeftDoor.x + RightDoor.x) / 2, 2f, LeftDoor.z));
+			ShevleListCenter.Add(new((LeftDoor.x + RightDoor.x) / 2, 2.5f, LeftDoor.z));
 
 			GameObject storageBounds = GameObject.Find("/Environment/HangarShip/StorageCloset");
 			MeshCollider bounds = storageBounds.GetComponentInChildren<MeshCollider>();
-			ClosetBoundsMin = bounds.bounds.min;
-			ClosetBoundsMax = bounds.bounds.max;
-
-			xMin = ClosetBoundsMin.x + 0.3f;
-			xMax = ClosetBoundsMax.x - 0.3f;
+			ClosetBoundsMin = new(bounds.bounds.min.x + 0.3f, bounds.bounds.min.y, bounds.bounds.min.z);
+			ClosetBoundsMax = new(bounds.bounds.max.x - 0.3f, bounds.bounds.max.y, bounds.bounds.max.z);
 
 			placementLocationX = StorageLocationXStart;
-		}
-
-		public Vector3 AdjustPositionWithinCloset(Vector3 targetPosition)
-		{
-			if (targetPosition.x > xMax)
-			{
-				targetPosition.x = xMax;
-			}
-			if (targetPosition.y > ClosetBoundsMax.y)
-			{
-				targetPosition.y = ClosetBoundsMax.y;
-			}
-			if (targetPosition.z > ClosetBoundsMax.z)
-			{
-				targetPosition.z = ClosetBoundsMax.z;
-			}
-
-			if (targetPosition.x < xMin)
-			{
-				targetPosition.x = xMin;
-			}
-			if (targetPosition.y < ClosetBoundsMin.y)
-			{
-				targetPosition.y = ClosetBoundsMin.y;
-			}
-			if (targetPosition.z < ClosetBoundsMin.z)
-			{
-				targetPosition.z = ClosetBoundsMin.z;
-			}
-			return targetPosition;
-		}
-
-		public float AdjustXPositionWithinCloset(float targetXPosition)
-		{
-			if (targetXPosition > xMax)
-			{
-				targetXPosition = xMax;
-			}
-
-			if (targetXPosition < xMin)
-			{
-				targetXPosition = xMin;
-			}
-			return targetXPosition;
 		}
 
 		/// <summary>
@@ -120,18 +70,12 @@ namespace ShipMaid.EntityHelpers
 		/// <returns>True if object is within placeable bounds.</returns>
 		public bool IsObjectWithinCloset(GrabbableObject obj)
 		{
-			return (obj.gameObject.transform.position.x < xMax) &&
-				(obj.gameObject.transform.position.y < ClosetBoundsMax.y) &&
-				(obj.gameObject.transform.position.z < ClosetBoundsMax.z) &&
-				(obj.gameObject.transform.position.x > xMin) &&
-				(obj.gameObject.transform.position.y > ClosetBoundsMin.y) &&
-				(obj.gameObject.transform.position.z > ClosetBoundsMin.z);
+			return PositionHelperFunctions.IsPositionWithinBounds(obj.gameObject.transform.position, ClosetBoundsMin, ClosetBoundsMax);
 		}
 
-		public bool IsXPositionInsideCloset(float xPosition)
+		public bool IsPositionWithinCloset(Vector3 placementPosition)
 		{
-			return (xPosition < xMax) &&
-				(xPosition > xMin);
+			return PositionHelperFunctions.IsPositionWithinBounds(placementPosition, ClosetBoundsMin, ClosetBoundsMax);
 		}
 
 		public void PlaceStorageObjectOnShelve(List<GrabbableObject> objectsOfType)
@@ -209,33 +153,16 @@ namespace ShipMaid.EntityHelpers
 					forwardBackwardOffset -= forwardBackwardStepSize;
 				}
 
-				// Check for and fix x locations out of bounds
-				if (!IsXPositionInsideCloset(placementLocationX))
+				Vector3 placementLocation = new(placementLocationX, ShevleListCenter[shelveToPlaceOn - 1].y, ShevleListCenter[shelveToPlaceOn - 1].z + StorageLocationZOffset + forwardBackwardOffset);// Check for and fix x locations out of bounds
+				if (!IsPositionWithinCloset(placementLocation))
 				{
-					placementLocationX = AdjustXPositionWithinCloset(placementLocationX);
+					placementLocation = PositionHelperFunctions.AdjustPositionWithinBounds(placementLocation, ClosetBoundsMin, ClosetBoundsMax);
 					ShipMaid.Log($"Fixed object location out of closet {obj.name}");
 				}
+				ShipMaid.Log($"Placing {obj.name} [{i + 1} of {objectsOfType.Count}] on shelve {shelveToPlaceOn} at {placementLocation.x},{placementLocation.y},{placementLocation.z}");
 
-				ShipMaid.Log($"Placing {obj.name} [{i + 1} of {objectsOfType.Count}] on shelve {shelveToPlaceOn} at {placementLocationX},{Shelve1Center.y},{Shelve1Center.z + StorageLocationZOffset + forwardBackwardOffset}");
+				NetworkingObjectManager.MakeObjectFallRpc(obj, placementLocation, false);
 
-				switch (shelveToPlaceOn)
-				{
-					case 1:
-						ShipMaidFunctions.MakeObjectFallRpc(obj, new(placementLocationX, Shelve1Center.y, Shelve1Center.z + StorageLocationZOffset + forwardBackwardOffset), false);
-						break;
-
-					case 2:
-						ShipMaidFunctions.MakeObjectFallRpc(obj, new(placementLocationX, Shelve2Center.y, Shelve2Center.z + StorageLocationZOffset + forwardBackwardOffset), false);
-						break;
-
-					case 3:
-						ShipMaidFunctions.MakeObjectFallRpc(obj, new(placementLocationX, Shelve3Center.y, Shelve3Center.z + StorageLocationZOffset + forwardBackwardOffset), false);
-						break;
-
-					case 4:
-						ShipMaidFunctions.MakeObjectFallRpc(obj, new(placementLocationX, Shelve4Center.y, Shelve4Center.z + StorageLocationZOffset + forwardBackwardOffset), false);
-						break;
-				}
 				placementLocationX += StorageLocationXStepSize;
 			}
 			// Return shelve iterator to default setting

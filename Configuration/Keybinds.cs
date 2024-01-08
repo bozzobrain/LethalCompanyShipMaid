@@ -1,6 +1,7 @@
 ﻿using GameNetcodeStuff;
 using HarmonyLib;
 using ShipMaid.Configuration;
+using ShipMaid.HelperFunctions;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using static UnityEngine.InputSystem.InputAction;
@@ -75,7 +76,7 @@ namespace ShipMaid
 			}
 			ShipMaid.Log("Cleanup Ship");
 
-			ShipMaidFunctions.OrganizeShipLoot();
+			LootOrganizingFunctions.OrganizeShipLoot();
 		}
 
 		private static void OnShipMaidClosetCleanupCalled(CallbackContext context)
@@ -86,7 +87,7 @@ namespace ShipMaid
 			}
 			ShipMaid.Log("Cleanup Closet");
 
-			ShipMaidFunctions.OrganizeStorageCloset();
+			LootOrganizingFunctions.OrganizeStorageCloset();
 		}
 	}
 }

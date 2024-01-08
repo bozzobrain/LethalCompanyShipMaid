@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using ShipMaid.Networking;
+using HarmonyLib;
 
 namespace ShipMaid.Patchers
 {
@@ -11,7 +12,7 @@ namespace ShipMaid.Patchers
 			[HarmonyPrefix]
 			private static void AddToTerminalObject(Terminal __instance)
 			{
-				__instance.gameObject.AddComponent<NetworkingObjectManager>();
+				__instance.gameObject.AddComponent<NetworkFunctions.NetworkingObjectManager>();
 			}
 		}
 	}
