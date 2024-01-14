@@ -61,12 +61,15 @@ A mod where the ship and the storage closet is cleaned up when you ~~scan~~ pres
 
 - UseItemTypePlacementOverrides
 	- When [Enabled] and you have pressed 'J' with an item type in a given location, all future cleanup commands will place this item in its given location 
+	- During bootup all scrap objects that are not on the storage shelve list will be candidates for definiting these location prior to you setting the item locations using 'J'
 
 - UseTwoHandedPlacementOverrides
 	- When [Enabled] and you have pressed 'J' with a one handed item in a given location, all future cleanup commands will place all one handed items in its the given location 
+	- During bootup all two handed objects that are not on the storage shelve list will be candidates for definiting this location prior to you setting the item locations using 'J'
 
 - UseOneHandedPlacementOverrides
 	- When [Enabled] and you have pressed 'J' with a two handed item in a given location, all future cleanup commands will place all two handed items in its the given location 
+	- During bootup all one handed objects that are not on the storage shelve list will be candidates for definiting this location prior to you setting the item locations using 'J'
 
 # Changes
 - V3.2.0
