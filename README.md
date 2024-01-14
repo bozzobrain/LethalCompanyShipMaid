@@ -59,9 +59,21 @@ A mod where the ship and the storage closet is cleaned up when you ~~scan~~ pres
 		- Enter a list of item names in comma separated form to ignore these items during organization.
 	- Thanks to [nontheoretical](https://github.com/nontheoretical) for the suggestion
 
+- UseItemTypePlacementOverrides
+	- When [Enabled] and you have pressed 'J' with an item type in a given location, all future cleanup commands will place this item in its given location 
 
+- UseTwoHandedPlacementOverrides
+	- When [Enabled] and you have pressed 'J' with a one handed item in a given location, all future cleanup commands will place all one handed items in its the given location 
+
+- UseOneHandedPlacementOverrides
+	- When [Enabled] and you have pressed 'J' with a two handed item in a given location, all future cleanup commands will place all two handed items in its the given location 
 
 # Changes
+- V3.2.0
+	- Added custom placement options (set locations with 'J' or whatever key you bind)
+		- Place all two handed objects in the same location using UseTwoHandedPlacementOverrides=[Enabled]
+		- Place all one handed objects in the same location using UseOneHandedPlacementOverrides=[Enabled]
+		- Place all items of a given type in the same location using UseItemTypePlacementOverrides=[Enabled]		
 - V3.1.1
 	- Fixed an issue where loot was landing either on the storage closet or in the suit rack area 
 - V3.1.0

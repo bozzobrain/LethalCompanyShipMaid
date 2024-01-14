@@ -13,44 +13,9 @@ namespace ShipMaid
 	{
 		public static PlayerControllerB localPlayerController;
 
-		private static InputAction shipMaidCleanupShip;
 		private static InputAction shipMaidCleanupCloset;
-
-		[HarmonyPatch(typeof(PlayerControllerB), "ConnectClientToPlayerObject")]
-		[HarmonyPostfix]
-		public static void OnLocalPlayerConnect(PlayerControllerB __instance)
-		{
-			localPlayerController = __instance;
-			shipMaidCleanupShip = new InputAction(null, 0, ConfigSettings.ShipMaidShipCleanupInputAction.Key.Value, "Press", null, null);
-			shipMaidCleanupCloset = new InputAction(null, 0, ConfigSettings.ShipMaidClosetCleanupInputAction.Key.Value, "Press", null, null);
-
-			if (localPlayerController.gameObject.activeSelf)
-			{
-				SubscribeToEvents();
-			}
-		}
-
-		private static void SubscribeToEvents()
-		{
-			if (shipMaidCleanupShip != null)
-			{
-				shipMaidCleanupShip.Enable();
-				shipMaidCleanupCloset.Enable();
-
-				shipMaidCleanupShip.performed += OnShipMaidShipCleanupCalled;
-				shipMaidCleanupCloset.performed += OnShipMaidClosetCleanupCalled;
-			}
-		}
-
-		[HarmonyPatch(typeof(PlayerControllerB), "OnEnable")]
-		[HarmonyPostfix]
-		public static void OnEnable(PlayerControllerB __instance)
-		{
-			if ((Object)(object)__instance == (Object)(object)localPlayerController)
-			{
-				SubscribeToEvents();
-			}
-		}
+		private static InputAction shipMaidCleanupShip;
+		private static InputAction shipMaidDropAndSetObjectTypePosition;
 
 		[HarmonyPatch(typeof(PlayerControllerB), "OnDisable")]
 		[HarmonyPostfix]
@@ -66,6 +31,59 @@ namespace ShipMaid
 				shipMaidCleanupCloset.performed -= OnShipMaidClosetCleanupCalled;
 				shipMaidCleanupCloset.Disable();
 			}
+			if (shipMaidDropAndSetObjectTypePosition != null && !((Object)(object)__instance != (Object)(object)localPlayerController))
+			{
+				shipMaidDropAndSetObjectTypePosition.performed -= OnShipMaidDropAndSetObjectTypePositionCalled;
+				shipMaidDropAndSetObjectTypePosition.Disable();
+			}
+		}
+
+		[HarmonyPatch(typeof(PlayerControllerB), "OnEnable")]
+		[HarmonyPostfix]
+		public static void OnEnable(PlayerControllerB __instance)
+		{
+			if ((Object)(object)__instance == (Object)(object)localPlayerController)
+			{
+				SubscribeToEvents();
+			}
+		}
+
+		[HarmonyPatch(typeof(PlayerControllerB), "ConnectClientToPlayerObject")]
+		[HarmonyPostfix]
+		public static void OnLocalPlayerConnect(PlayerControllerB __instance)
+		{
+			localPlayerController = __instance;
+			shipMaidCleanupShip = new InputAction(null, 0, ConfigSettings.ShipMaidShipCleanupInputAction.Key.Value, "Press", null, null);
+			shipMaidCleanupCloset = new InputAction(null, 0, ConfigSettings.ShipMaidClosetCleanupInputAction.Key.Value, "Press", null, null);
+			shipMaidDropAndSetObjectTypePosition = new InputAction(null, 0, ConfigSettings.ShipMaidDropAndSetObjectTypePositionInputAction.Key.Value, "Press", null, null);
+			ShipMaidFunctions.initItemLocations();
+
+			if (localPlayerController.gameObject.activeSelf)
+			{
+				SubscribeToEvents();
+			}
+		}
+
+		private static void OnShipMaidClosetCleanupCalled(CallbackContext context)
+		{
+			if ((Object)(object)localPlayerController == null || !localPlayerController.isPlayerControlled || localPlayerController.inTerminalMenu || localPlayerController.IsServer && !localPlayerController.isHostPlayerObject)
+			{
+				return;
+			}
+			ShipMaid.Log("Cleanup Closet");
+
+			LootOrganizingFunctions.OrganizeStorageCloset();
+		}
+
+		private static void OnShipMaidDropAndSetObjectTypePositionCalled(CallbackContext context)
+		{
+			if ((Object)(object)localPlayerController == null || !localPlayerController.isPlayerControlled || localPlayerController.inTerminalMenu || localPlayerController.IsServer && !localPlayerController.isHostPlayerObject)
+			{
+				return;
+			}
+			ShipMaid.Log("Set object cleanup position");
+
+			ShipMaidFunctions.DropAndSetObjectTypePosition();
 		}
 
 		private static void OnShipMaidShipCleanupCalled(CallbackContext context)
@@ -79,15 +97,23 @@ namespace ShipMaid
 			LootOrganizingFunctions.OrganizeShipLoot();
 		}
 
-		private static void OnShipMaidClosetCleanupCalled(CallbackContext context)
+		private static void SubscribeToEvents()
 		{
-			if ((Object)(object)localPlayerController == null || !localPlayerController.isPlayerControlled || localPlayerController.inTerminalMenu || localPlayerController.IsServer && !localPlayerController.isHostPlayerObject)
+			if (shipMaidCleanupShip != null)
 			{
-				return;
+				shipMaidCleanupShip.Enable();
+				shipMaidCleanupShip.performed += OnShipMaidShipCleanupCalled;
 			}
-			ShipMaid.Log("Cleanup Closet");
-
-			LootOrganizingFunctions.OrganizeStorageCloset();
+			if (shipMaidCleanupCloset != null)
+			{
+				shipMaidCleanupCloset.Enable();
+				shipMaidCleanupCloset.performed += OnShipMaidClosetCleanupCalled;
+			}
+			if (shipMaidDropAndSetObjectTypePosition != null)
+			{
+				shipMaidDropAndSetObjectTypePosition.Enable();
+				shipMaidDropAndSetObjectTypePosition.performed += OnShipMaidDropAndSetObjectTypePositionCalled;
+			}
 		}
 	}
 }

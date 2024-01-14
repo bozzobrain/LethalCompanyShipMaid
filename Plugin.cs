@@ -9,9 +9,10 @@ namespace ShipMaid
 	internal class ShipMaid : BaseUnityPlugin
 	{
 		public static ShipMaid instance;
+		public static ShipMaidFunctions smf = new();
 		private const string GUID = "ShipMaid";
 		private const string NAME = "ShipMaid";
-		private const string VERSION = "3.1.1";
+		private const string VERSION = "3.2.0";
 
 		public static void Log(string message)
 		{

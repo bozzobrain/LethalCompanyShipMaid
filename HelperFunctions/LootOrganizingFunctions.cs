@@ -1,5 +1,6 @@
 ﻿using ShipMaid.Configuration;
 using ShipMaid.EntityHelpers;
+using ShipMaid.ObjectHelpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -111,23 +112,23 @@ namespace ShipMaid.HelperFunctions
 			// Single handed objects are closer to the door
 			// calculate a z offset that places objects on different z location by type
 			float frontOfShipAreaZOffset = 2.25f / objectNames.Count;
-			float frontOfShipXAreaOffset = 0;
+			float frontOfShipAreaXOffset = 0;
 			float backOfShipAreaZOffset = 2.75f / objectNames.Count;
-			float backOfShipXAreaOffset = 7;
+			float backOfShipAreaXOffset = 7;
 			bool targetLocationFront = false;
 			float objectTypeZOffset = 0;
-			float twoHandedOffset = 0;
+			float objectTypeXOffset = 0;
 			if (twoHanded)
 			{
 				if (ConfigSettings.TwoHandedItemLocation.Key.Value == "Front")
 				{
-					twoHandedOffset = frontOfShipXAreaOffset;
+					objectTypeXOffset = frontOfShipAreaXOffset;
 					objectTypeZOffset = frontOfShipAreaZOffset;
 					targetLocationFront = true;
 				}
 				else
 				{
-					twoHandedOffset = backOfShipXAreaOffset;
+					objectTypeXOffset = backOfShipAreaXOffset;
 					objectTypeZOffset = backOfShipAreaZOffset;
 				}
 			}
@@ -136,11 +137,11 @@ namespace ShipMaid.HelperFunctions
 				if (ConfigSettings.TwoHandedItemLocation.Key.Value == "Front")
 				{
 					objectTypeZOffset = backOfShipAreaZOffset;
-					twoHandedOffset = backOfShipXAreaOffset;
+					objectTypeXOffset = backOfShipAreaXOffset;
 				}
 				else
 				{
-					twoHandedOffset = frontOfShipXAreaOffset;
+					objectTypeXOffset = frontOfShipAreaXOffset;
 					objectTypeZOffset = frontOfShipAreaZOffset;
 					targetLocationFront = true;
 				}
@@ -183,16 +184,38 @@ namespace ShipMaid.HelperFunctions
 				// Make sure first object is not null in type
 				if (firstObjectOfType != null)
 				{
-					// Find placement location adjust z by small amount for each type of object
-					Vector3 placementPosition = new(hsh.GetShipCenterLocation().x, hsh.GetShipCenterLocation().y, hsh.GetShipCenterLocation().z);
-					if (ConfigSettings.ItemGrouping.Key.Value == "Loose")
-						placementPosition.z -= objectTypeZOffset * itemCounter;
+					Vector3 placementPosition;
+					if (ShipMaidFunctions.GetObjectPositionTarget(firstObjectOfType) is GrabbableObjectPositionHelper goph && goph != null && ConfigSettings.UseItemTypePlacementOverrides.Key.Value == "Enabled")
+					{
+						ShipMaid.Log($"Setting position from memory for {firstObjectOfType.name}");
+						placementPosition = goph.PlacementPosition;
+					}
+					else if (ShipMaidFunctions.GetTwoHandedPositionTarget() is GrabbableObjectPositionHelper goph_TwoHanded && goph_TwoHanded != null && ConfigSettings.UseTwoHandedPlacementOverrides.Key.Value == "Enabled" && twoHanded)
+					{
+						ShipMaid.Log($"Setting Two Handed position from memory for {firstObjectOfType.name}");
+						placementPosition = goph_TwoHanded.PlacementPosition;
+					}
+					else if (ShipMaidFunctions.GetOneHandedPositionTarget() is GrabbableObjectPositionHelper goph_OneHanded && goph_OneHanded != null && ConfigSettings.UseOneHandedPlacementOverrides.Key.Value == "Enabled" && !twoHanded)
+					{
+						ShipMaid.Log($"Setting One Handed position from memory for {firstObjectOfType.name}");
+						placementPosition = goph_OneHanded.PlacementPosition;
+					}
 					else
-						placementPosition.z -= (objectTypeZOffset * itemCounter * 0.1f) + objectTypeZOffset * 0.9f * objectNames.Count;
+					{
+						// Find placement location adjust z by small amount for each type of object
+						placementPosition = new(hsh.GetShipCenterLocation().x, hsh.GetShipCenterLocation().y, hsh.GetShipCenterLocation().z);
+						if (ConfigSettings.ItemGrouping.Key.Value == "Loose")
+							placementPosition.z -= objectTypeZOffset * itemCounter;
+						else
+							placementPosition.z -= (objectTypeZOffset * itemCounter * 0.1f) + objectTypeZOffset * 0.9f * objectNames.Count;
 
-					// Objects in back of shop can be moved closer to the wall
-					if (!targetLocationFront)
-						placementPosition.z += 0.5f;
+						// Objects in back of shop can be moved closer to the wall
+						if (!targetLocationFront)
+							placementPosition.z += 0.5f;
+
+						// Shift item position by scrap value (higher value is closer to door)
+						placementPosition.x = hsh.GetShipCenterLocation().x + objectTypeXOffset;
+					}
 
 					foreach (var obj in objectsOfType)
 					{
@@ -200,11 +223,8 @@ namespace ShipMaid.HelperFunctions
 						if (obj.isHeld)
 							continue;
 
-						// Shift item position by scrap value (higher value is closer to door)
-						placementPosition.x = hsh.GetShipCenterLocation().x + twoHandedOffset;
-
 						// Choose how to organze each item of loot
-						if (ConfigSettings.OrganizationTechnique.Key.Value == "Value")
+						if (ConfigSettings.OrganizationTechnique.Key.Value == "Value" && ConfigSettings.UseItemTypePlacementOverrides.Key.Value != "Enabled" && ConfigSettings.UseOneHandedPlacementOverrides.Key.Value != "Enabled" && ConfigSettings.UseTwoHandedPlacementOverrides.Key.Value != "Enabled")
 						{
 							if (targetLocationFront)
 							{
@@ -221,11 +241,12 @@ namespace ShipMaid.HelperFunctions
 							}
 							offsetLocations.Add(placementPosition.x);
 						}
-						else
+						else if (ConfigSettings.UseItemTypePlacementOverrides.Key.Value != "Enabled" && ConfigSettings.UseOneHandedPlacementOverrides.Key.Value != "Enabled" && ConfigSettings.UseTwoHandedPlacementOverrides.Key.Value == "Enabled")
 						{
 							placementPosition.x += xPositionOffset;
 						}
 
+						// Make sure object is within ship (fix if outside boundaries)
 						if (!hsh.IsPositionWithinShip(placementPosition))
 						{
 							placementPosition = hsh.AdjustPositionWithinShip(placementPosition);

@@ -5,17 +5,18 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using static ShipMaid.Networking.NetworkFunctions;
+using Unity.Netcode;
 
 namespace ShipMaid.EntityHelpers
 {
 	public class HangarShipHelper
 	{
-		public static Vector3 ShipCenterForPlacement;
 		public static Vector3 ShipBoundsCenter;
 		public static Vector3 ShipBoundsExtents;
 		public static Vector3 ShipBoundsMax;
 		public static Vector3 ShipBoundsMin;
 		public static Vector3 ShipCenter;
+		public static Vector3 ShipCenterForPlacement;
 		public static Vector3 ShipCollider;
 		public static Vector3 ShipExtends;
 		public static GameObject ShipObject;
@@ -34,7 +35,36 @@ namespace ShipMaid.EntityHelpers
 				ShipCenter.y + 1.66f);
 			// These values are used to ensure the loots arms and legs stay in the ship at all times
 			ShipBoundsMin = new(bounds.bounds.min.x + 1.75f, bounds.bounds.min.y, bounds.bounds.min.z);
-			ShipBoundsMax = new(bounds.bounds.max.x - 7f, bounds.bounds.max.y, bounds.bounds.max.z);
+			ShipBoundsMax = new(bounds.bounds.max.x - 5f, bounds.bounds.max.y, bounds.bounds.max.z);
+		}
+
+		/// <summary>
+		/// Get transform for the ship.
+		/// </summary>
+		/// <returns>Transform object of the ship.</returns>
+		public static NetworkObject GetShipNetworkObject()
+		{
+			GameObject ship = GameObject.Find("/Environment/HangarShip");
+			return ship.gameObject.GetComponent<NetworkObject>();
+		}
+
+		/// <summary>
+		/// Get transform for the ship.
+		/// </summary>
+		/// <returns>Transform object of the ship.</returns>
+		public static Transform GetShipTransform()
+		{
+			GameObject ship = GameObject.Find("/Environment/HangarShip");
+			return ship.gameObject.transform;
+		}
+
+		/// <summary>
+		/// Makes target position bounded by ShipBounds
+		/// </summary>
+		/// <returns>Vector3 position of the target bounded by ship.</returns>
+		public Vector3 AdjustPositionWithinShip(Vector3 targetPosition)
+		{
+			return PositionHelperFunctions.AdjustPositionWithinBounds(targetPosition, ShipBoundsMin, ShipBoundsMax);
 		}
 
 		/// <summary>
@@ -54,15 +84,6 @@ namespace ShipMaid.EntityHelpers
 				}
 			}
 			return scrapList;
-		}
-
-		/// <summary>
-		/// Makes target position bounded by ShipBounds
-		/// </summary>
-		/// <returns>Vector3 position of the target bounded by ship.</returns>
-		public Vector3 AdjustPositionWithinShip(Vector3 targetPosition)
-		{
-			return PositionHelperFunctions.AdjustPositionWithinBounds(targetPosition, ShipBoundsMin, ShipBoundsMax);
 		}
 
 		/// <summary>

@@ -6,8 +6,6 @@ namespace ShipMaid.Configuration
 {
 	public static class ConfigSettings
 	{
-		public static Dictionary<string, ConfigEntryBase> currentConfigEntries = new Dictionary<string, ConfigEntryBase>();
-
 		public static ConfigSetupList ClosetLocationOverride = new ConfigSetupList()
 		{
 			pluginName = "ShipMaid",
@@ -15,6 +13,8 @@ namespace ShipMaid.Configuration
 			SettingValue = "Whoopie,Key,Flashlight,StunGrenade",
 			SettingDescription = "List of items separated by comma that will be automatically placed in the storage container on ship cleanup.",
 		};
+
+		public static Dictionary<string, ConfigEntryBase> currentConfigEntries = new Dictionary<string, ConfigEntryBase>();
 
 		public static ConfigSetupString ItemGrouping = new ConfigSetupString()
 		{
@@ -38,6 +38,14 @@ namespace ShipMaid.Configuration
 			ActionName = "CleanupClosetKey",
 			KeyboardMapping = "<Keyboard>/n",
 			ActionDescription = "Activate ship maid closet keybind.",
+		};
+
+		public static ConfigSetupInputAction ShipMaidDropAndSetObjectTypePositionInputAction = new ConfigSetupInputAction()
+		{
+			pluginName = "ShipMaid",
+			ActionName = "DropAndSetObjectTypePositionKey",
+			KeyboardMapping = "<Keyboard>/j",
+			ActionDescription = "Drop a held item and set the position of this type of item.",
 		};
 
 		public static ConfigSetupInputAction ShipMaidShipCleanupInputAction = new ConfigSetupInputAction()
@@ -64,6 +72,30 @@ namespace ShipMaid.Configuration
 			SettingDescription = "Choose location for two handed objects, [Front] of ship, or [Back] of ship. The opposite location will have the single handed items",
 		};
 
+		public static ConfigSetupString UseItemTypePlacementOverrides = new ConfigSetupString()
+		{
+			pluginName = "ShipMaid",
+			SettingName = "UseItemTypePlacementOverrides",
+			SettingValue = "Disabled",
+			SettingDescription = "If [Enabled], pressing J (or what ever keybind from DropAndSetObjectTypePositionKey) will set an objects item type location for organization",
+		};
+
+		public static ConfigSetupString UseOneHandedPlacementOverrides = new ConfigSetupString()
+		{
+			pluginName = "ShipMaid",
+			SettingName = "UseOneHandedPlacementOverrides",
+			SettingValue = "Disabled",
+			SettingDescription = "If [Enabled], pressing J (or what ever keybind from DropAndSetObjectTypePositionKey) with a one handed object will set all one handed objects location for organization",
+		};
+
+		public static ConfigSetupString UseTwoHandedPlacementOverrides = new ConfigSetupString()
+		{
+			pluginName = "ShipMaid",
+			SettingName = "UseTwoHandedPlacementOverrides",
+			SettingValue = "Disabled",
+			SettingDescription = "If [Enabled], pressing J (or what ever keybind from DropAndSetObjectTypePositionKey) with a two handed object will set all two handed objects location for organization",
+		};
+
 		public static void BindConfigSettings()
 		{
 			ShipMaid.Log("BindingConfigs");
@@ -74,6 +106,10 @@ namespace ShipMaid.Configuration
 			currentConfigEntries = ItemGrouping.Bind(currentConfigEntries);
 			currentConfigEntries = ClosetLocationOverride.Bind(currentConfigEntries);
 			currentConfigEntries = SortingLocationBlacklist.Bind(currentConfigEntries);
+			currentConfigEntries = ShipMaidDropAndSetObjectTypePositionInputAction.Bind(currentConfigEntries);
+			currentConfigEntries = UseItemTypePlacementOverrides.Bind(currentConfigEntries);
+			currentConfigEntries = UseOneHandedPlacementOverrides.Bind(currentConfigEntries);
+			currentConfigEntries = UseTwoHandedPlacementOverrides.Bind(currentConfigEntries);
 
 			TryRemoveOldConfigSettings();
 		}
