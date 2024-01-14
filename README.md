@@ -72,11 +72,15 @@ A mod where the ship and the storage closet is cleaned up when you ~~scan~~ pres
 	- During bootup all one handed objects that are not on the storage shelve list will be candidates for definiting this location prior to you setting the item locations using 'J'
 
 # Changes
+- V3.2.1
+	- A minor patch fix for possible conflicting configuration issues
+
 - V3.2.0
 	- Added custom placement options (set locations with 'J' or whatever key you bind)
 		- Place all two handed objects in the same location using UseTwoHandedPlacementOverrides=[Enabled]
 		- Place all one handed objects in the same location using UseOneHandedPlacementOverrides=[Enabled]
 		- Place all items of a given type in the same location using UseItemTypePlacementOverrides=[Enabled]		
+
 - V3.1.1
 	- Fixed an issue where loot was landing either on the storage closet or in the suit rack area 
 - V3.1.0
