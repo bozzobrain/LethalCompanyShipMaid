@@ -55,7 +55,7 @@ namespace ShipMaid
 			localPlayerController = __instance;
 			shipMaidCleanupShip = new InputAction(null, 0, ConfigSettings.ShipMaidShipCleanupInputAction.Key.Value, "Press", null, null);
 			shipMaidCleanupCloset = new InputAction(null, 0, ConfigSettings.ShipMaidClosetCleanupInputAction.Key.Value, "Press", null, null);
-			shipMaidDropAndSetObjectTypePosition = new InputAction(null, 0, ConfigSettings.ShipMaidDropAndSetObjectTypePositionInputAction.Key.Value, "Press", null, null);
+			shipMaidDropAndSetObjectTypePosition = new InputAction(null, 0, ConfigSettings.ShipMaidSetObjectTypePositionInputAction.Key.Value, "Press", null, null);
 			ShipMaidFunctions.initItemLocations();
 
 			if (localPlayerController.gameObject.activeSelf)

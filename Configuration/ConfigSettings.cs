@@ -40,12 +40,12 @@ namespace ShipMaid.Configuration
 			ActionDescription = "Activate ship maid closet keybind.",
 		};
 
-		public static ConfigSetupInputAction ShipMaidDropAndSetObjectTypePositionInputAction = new ConfigSetupInputAction()
+		public static ConfigSetupInputAction ShipMaidSetObjectTypePositionInputAction = new ConfigSetupInputAction()
 		{
 			pluginName = "ShipMaid",
-			ActionName = "DropAndSetObjectTypePositionKey",
+			ActionName = "SetObjectTypePositionKey",
 			KeyboardMapping = "<Keyboard>/j",
-			ActionDescription = "Drop a held item and set the position of this type of item.",
+			ActionDescription = "Set the position of this type of item (two handed / one handed / item type).",
 		};
 
 		public static ConfigSetupInputAction ShipMaidShipCleanupInputAction = new ConfigSetupInputAction()
@@ -106,7 +106,7 @@ namespace ShipMaid.Configuration
 			currentConfigEntries = ItemGrouping.Bind(currentConfigEntries);
 			currentConfigEntries = ClosetLocationOverride.Bind(currentConfigEntries);
 			currentConfigEntries = SortingLocationBlacklist.Bind(currentConfigEntries);
-			currentConfigEntries = ShipMaidDropAndSetObjectTypePositionInputAction.Bind(currentConfigEntries);
+			currentConfigEntries = ShipMaidSetObjectTypePositionInputAction.Bind(currentConfigEntries);
 			currentConfigEntries = UseItemTypePlacementOverrides.Bind(currentConfigEntries);
 			currentConfigEntries = UseOneHandedPlacementOverrides.Bind(currentConfigEntries);
 			currentConfigEntries = UseTwoHandedPlacementOverrides.Bind(currentConfigEntries);
