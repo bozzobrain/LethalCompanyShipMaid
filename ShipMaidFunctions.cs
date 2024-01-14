@@ -45,9 +45,9 @@ namespace ShipMaid
 				}
 				else
 				{
-					if (OneHandedPositions.Where(o => o.obj.name == obj.name).Any())
+					if (OneHandedPositions.Where(o => o.obj.itemProperties.twoHanded == false).Any())
 					{
-						OneHandedPositions.Where(o => o.obj.name == obj.name).First().PlacementPosition = obj.gameObject.transform.position;
+						OneHandedPositions.Where(o => o.obj.itemProperties.twoHanded == false).First().PlacementPosition = obj.gameObject.transform.position;
 					}
 					else
 					{

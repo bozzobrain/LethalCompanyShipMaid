@@ -82,6 +82,9 @@ A mod where the ship and the storage closet is cleaned up when you press the ass
 		- During bootup all one handed objects that are not on the storage shelve list will be candidates for definiting this location prior to you setting the item locations using 'J'
 
 # Changes
+- V3.2.3
+	- Patched issue with one handed object location settings being incorrectly stored
+	- Thanks to [jcsnider](https://github.com/jcsnider) for the finding this issue
 - V3.2.2
 	- Update readme for additional information and fixed old descriptions 
 - V3.2.1

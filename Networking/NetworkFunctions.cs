@@ -78,7 +78,7 @@ namespace ShipMaid.Networking
 					{
 						obj.gameObject.transform.SetParent(ship.transform);
 					}
-					targetlocation = ship.transform.position;
+					targetlocation = placementPosition;
 					debugLocation = "ship";
 				}
 				else
@@ -87,7 +87,7 @@ namespace ShipMaid.Networking
 					{
 						obj.gameObject.transform.SetParent(storageCloset.transform);
 					}
-					targetlocation = storageCloset.transform.position;
+					targetlocation = placementPosition;
 					debugLocation = "storage";
 				}
 				ShipMaid.Log($"Request to make GrabbableObject {obj.name} fall to ground in {debugLocation} - {targetlocation.x},{targetlocation.y},{targetlocation.z}");

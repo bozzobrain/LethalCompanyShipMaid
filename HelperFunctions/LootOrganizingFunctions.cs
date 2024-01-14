@@ -197,7 +197,7 @@ namespace ShipMaid.HelperFunctions
 					}
 					else if (ShipMaidFunctions.GetOneHandedPositionTarget() is GrabbableObjectPositionHelper goph_OneHanded && goph_OneHanded != null && ConfigSettings.UseOneHandedPlacementOverrides.Key.Value == "Enabled" && !twoHanded)
 					{
-						ShipMaid.Log($"Setting One Handed position from memory for {firstObjectOfType.name}");
+						ShipMaid.LogError($"Setting One Handed position from memory for {firstObjectOfType.name} - {goph_OneHanded.PlacementPosition.x},{goph_OneHanded.PlacementPosition.y},{goph_OneHanded.PlacementPosition.z}");
 						placementPosition = goph_OneHanded.PlacementPosition;
 					}
 					else
