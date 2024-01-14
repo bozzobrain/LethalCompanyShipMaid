@@ -167,23 +167,23 @@ namespace ShipMaid.HelperFunctions
 				// Make sure this item is not being held currently
 				var firstObjectOfType = objectsOfType.FirstOrDefault(obj => !obj.isHeld);
 
-				// Keep track of offset locations to disuade locations that identical (same scrap value)
-				List<float> offsetLocations = new List<float>();
-
-				// if stacking move the stacks around a bit to separate piles
-				if (ConfigSettings.OrganizationTechnique.Key.Value == "Stack")
-				{
-					System.Random r = new();
-					xPositionOffset = (float)r.NextDouble() * r.Next(-1, 2);
-
-					// Force objects to the boundaries for debugging
-					//xPositionOffset = r.Next(-1,2);
-
-					if (ConfigSettings.ItemGrouping.Key.Value == "Loose") xPositionOffset *= 2.0f;
-				}
 				// Make sure first object is not null in type
 				if (firstObjectOfType != null)
 				{
+					// Keep track of offset locations to disuade locations that identical (same scrap value)
+					List<float> offsetLocations = new List<float>();
+
+					// if stacking move the stacks around a bit to separate piles
+					if (ConfigSettings.OrganizationTechnique.Key.Value == "Stack" && ConfigSettings.UseItemTypePlacementOverrides.Key.Value != "Enabled" && ConfigSettings.UseOneHandedPlacementOverrides.Key.Value != "Enabled" && ConfigSettings.UseTwoHandedPlacementOverrides.Key.Value != "Enabled")
+					{
+						System.Random r = new();
+						xPositionOffset = (float)r.NextDouble() * r.Next(-1, 2);
+
+						// Force objects to the boundaries for debugging
+						//xPositionOffset = r.Next(-1,2);
+
+						if (ConfigSettings.ItemGrouping.Key.Value == "Loose") xPositionOffset *= 2.0f;
+					}
 					Vector3 placementPosition;
 					if (ShipMaidFunctions.GetObjectPositionTarget(firstObjectOfType) is GrabbableObjectPositionHelper goph && goph != null && ConfigSettings.UseItemTypePlacementOverrides.Key.Value == "Enabled")
 					{
@@ -241,7 +241,7 @@ namespace ShipMaid.HelperFunctions
 							}
 							offsetLocations.Add(placementPosition.x);
 						}
-						else if (ConfigSettings.UseItemTypePlacementOverrides.Key.Value != "Enabled" && ConfigSettings.UseOneHandedPlacementOverrides.Key.Value != "Enabled" && ConfigSettings.UseTwoHandedPlacementOverrides.Key.Value == "Enabled")
+						else if (ConfigSettings.UseItemTypePlacementOverrides.Key.Value != "Enabled" && ConfigSettings.UseOneHandedPlacementOverrides.Key.Value != "Enabled" && ConfigSettings.UseTwoHandedPlacementOverrides.Key.Value != "Enabled")
 						{
 							placementPosition.x += xPositionOffset;
 						}
@@ -249,7 +249,10 @@ namespace ShipMaid.HelperFunctions
 						// Make sure object is within ship (fix if outside boundaries)
 						if (!hsh.IsPositionWithinShip(placementPosition))
 						{
-							placementPosition = hsh.AdjustPositionWithinShip(placementPosition);
+							var newPosition = hsh.AdjustPositionWithinShip(placementPosition);
+							ShipMaid.LogError($"Ship loot detected outside of ship - {obj.name} - {placementPosition.x},{placementPosition.y},{placementPosition.z}");
+							placementPosition = new(newPosition.x, newPosition.y, newPosition.z);
+							ShipMaid.LogError($"Corrected to- {obj.name} - {placementPosition.x},{placementPosition.y},{placementPosition.z}");
 						}
 						// Move the object if position needs adjusted
 						if (!PositionHelperFunctions.SameLocation(obj.transform.position, placementPosition))
