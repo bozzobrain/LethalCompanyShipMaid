@@ -36,6 +36,7 @@ namespace ShipMaid.EntityHelpers
 			// These values are used to ensure the loots arms and legs stay in the ship at all times
 			ShipBoundsMin = new(bounds.bounds.min.x + 1.75f, bounds.bounds.min.y, bounds.bounds.min.z - 0.5f);
 			ShipBoundsMax = new(bounds.bounds.max.x - 5f, bounds.bounds.max.y, bounds.bounds.max.z - 0.5f);
+			//ShipMaid.LogError($"Inside dimensions {ShipBoundsMax.x - ShipBoundsMin.x},{ShipBoundsMax.y - ShipBoundsMin.y},{ShipBoundsMax.z - ShipBoundsMin.z}");
 		}
 
 		/// <summary>

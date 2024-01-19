@@ -190,15 +190,15 @@ namespace ShipMaid.HelperFunctions
 						ShipMaid.Log($"Setting position from memory for {firstObjectOfType.name}");
 						placementPosition = goph.PlacementPosition;
 					}
-					else if (ShipMaidFunctions.GetTwoHandedPositionTarget() is GrabbableObjectPositionHelper goph_TwoHanded && goph_TwoHanded != null && ConfigSettings.UseTwoHandedPlacementOverrides.Key.Value == "Enabled" && twoHanded)
+					else if (ShipMaidFunctions.GetTwoHandedPositionTarget() is Vector3 goph_TwoHanded && goph_TwoHanded != null && ConfigSettings.UseTwoHandedPlacementOverrides.Key.Value == "Enabled" && twoHanded)
 					{
-						ShipMaid.Log($"Setting Two Handed position from memory for {firstObjectOfType.name}");
-						placementPosition = goph_TwoHanded.PlacementPosition;
+						ShipMaid.LogError($"Setting Two Handed position from memory for {firstObjectOfType.name} - {goph_TwoHanded.x},{goph_TwoHanded.y},{goph_TwoHanded.z}");
+						placementPosition = goph_TwoHanded;
 					}
-					else if (ShipMaidFunctions.GetOneHandedPositionTarget() is GrabbableObjectPositionHelper goph_OneHanded && goph_OneHanded != null && ConfigSettings.UseOneHandedPlacementOverrides.Key.Value == "Enabled" && !twoHanded)
+					else if (ShipMaidFunctions.GetOneHandedPositionTarget() is Vector3 goph_OneHanded && goph_OneHanded != null && ConfigSettings.UseOneHandedPlacementOverrides.Key.Value == "Enabled" && !twoHanded)
 					{
-						ShipMaid.LogError($"Setting One Handed position from memory for {firstObjectOfType.name} - {goph_OneHanded.PlacementPosition.x},{goph_OneHanded.PlacementPosition.y},{goph_OneHanded.PlacementPosition.z}");
-						placementPosition = goph_OneHanded.PlacementPosition;
+						ShipMaid.LogError($"Setting One Handed position from memory for {firstObjectOfType.name} - {goph_OneHanded.x},{goph_OneHanded.y},{goph_OneHanded.z}");
+						placementPosition = goph_OneHanded;
 					}
 					else
 					{

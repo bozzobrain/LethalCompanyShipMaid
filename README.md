@@ -17,6 +17,7 @@ A mod where the ship and the storage closet is cleaned up when you press the ass
 		- Items in the closet will be staggered slightly to the right of the 'first' item
 	- Set object location default keybinding is 'J'
 		- If UseOneHandedPlacementOverrides / UseTwoHandedPlacementOverrides / UseItemTypePlacementOverrides is enabled, pressing this keybind will log the location of the given item for future organization requests
+		- Object override locations are stored in the config file and will persist into other game files
 
 ## Config File Parameters
 - Keybinds
@@ -72,16 +73,44 @@ A mod where the ship and the storage closet is cleaned up when you press the ass
 	- UseItemTypePlacementOverrides
 		- When [Enabled] and you have pressed 'J' with an item type in a given location, all future cleanup commands will place this item type in its given location 
 		- During bootup all scrap objects that are not on the storage shelve list will be candidates for definiting these location prior to you setting the item locations using 'J'
+		- Currently these candidates are not stored into the config file, you must press the keybind to store new locations into the config file to save objects locations if the plugin was not loaded before (tell me to change it if you want this feature)
 
+	- ItemPlacementOverrideLocation
+		- The position in the ship where items of a given types will be placed if overrides are enabled for one handed items
+		- Configuration will be automatically updated when the keybind is pressed in game (although you could manually enter this information)
+		- If someone wants to generate a list of all item names for reference, please send it to me and I'll place it in this readme
+		- Format is:
+			- "itemname(Clone),posx,posy,posz"
+		- For multiple items, continue this format with a comma between item types
+			- "itemname(Clone),posx,posy,posz,itemname2(Clone),posx,posy,posz"
+		
 	- UseTwoHandedPlacementOverrides
 		- When [Enabled] and you have pressed 'J' with a one handed item in a given location, all future cleanup commands will place all one handed items in its the given location 
 		- During bootup all two handed objects that are not on the storage shelve list will be candidates for definiting this location prior to you setting the item locations using 'J'
+		- Currently these candidates are not stored into the config file, you must press the keybind to store new locations into the config file to save objects locations if the plugin was not loaded before (tell me to change it if you want this feature)
 
+	- TwoHandedItemPlacementOverrideLocation
+		- The position in the ship where Two-Handed Objects will be placed if overrides are enabled for two handed items
+		- Configuration will be automatically updated when the keybind is pressed in game
+		- Format is:
+			- "posx,posy,posz"
+	
 	- UseOneHandedPlacementOverrides
 		- When [Enabled] and you have pressed 'J' with a two handed item in a given location, all future cleanup commands will place all two handed items in its the given location 
 		- During bootup all one handed objects that are not on the storage shelve list will be candidates for definiting this location prior to you setting the item locations using 'J'
-
+		- Currently these candidates are not stored into the config file, you must press the keybind to store new locations into the config file to save objects locations if the plugin was not loaded before (tell me to change it if you want this feature)
+		
+	- OneHandedItemPlacementOverrideLocation
+		- The position in the ship where One-Handed Objects will be placed if overrides are enabled for one handed items
+		- Configuration will be automatically updated when the keybind is pressed in game
+		- Format is:
+			- "posx,posy,posz"
+		
 # Changes
+- V3.2.4
+	- Introduced the configuration file handling of item positions for all placement overrides
+	- Now placements locations for all overrides are stored in the config file and will persist across game resets and different save files.
+	- Thanks to [jcsnider](https://github.com/jcsnider) for the pushing to develop this feature
 - V3.2.3
 	- Patched issue with one handed object location settings being incorrectly stored
 	- Thanks to [jcsnider](https://github.com/jcsnider) for the finding this issue

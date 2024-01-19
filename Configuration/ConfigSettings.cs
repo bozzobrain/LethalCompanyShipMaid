@@ -24,6 +24,22 @@ namespace ShipMaid.Configuration
 			SettingDescription = "[Loose] Spread items accross the ship from left to right -or- [Tight] Pack the items to the side of the ship with the suit rack.",
 		};
 
+		public static ConfigSetupGrabbableObjectPositions ItemPlacementOverrideLocation = new()
+		{
+			pluginName = "ShipMaid",
+			SettingName = "ItemPlacementOverrideLocation",
+			SettingValue = "name,0.00,0.00,0.00",
+			SettingDescription = "Name and location of the item location (if UseItemTypePlacementOverrides is enabled)",
+		};
+
+		public static ConfigSetupVector3 OneHandedItemPlacementOverrideLocation = new()
+		{
+			pluginName = "ShipMaid",
+			SettingName = "OneHandedItemPlacementOverrideLocation",
+			SettingValue = "0.00,0.00,0.00",
+			SettingDescription = "Vector3 location of the One-handed item location (if UseOneHandedPlacementOverrides is enabled)",
+		};
+
 		public static ConfigSetupString OrganizationTechnique = new ConfigSetupString()
 		{
 			pluginName = "ShipMaid",
@@ -72,12 +88,20 @@ namespace ShipMaid.Configuration
 			SettingDescription = "Choose location for two handed objects, [Front] of ship, or [Back] of ship. The opposite location will have the single handed items",
 		};
 
+		public static ConfigSetupVector3 TwoHandedItemPlacementOverrideLocation = new()
+		{
+			pluginName = "ShipMaid",
+			SettingName = "TwoHandedItemPlacementOverrideLocation",
+			SettingValue = "0.00,0.00,0.00",
+			SettingDescription = "Vector3 location of the Two-handed item location (if UseTwoHandedPlacementOverrides is enabled)",
+		};
+
 		public static ConfigSetupString UseItemTypePlacementOverrides = new ConfigSetupString()
 		{
 			pluginName = "ShipMaid",
 			SettingName = "UseItemTypePlacementOverrides",
 			SettingValue = "Disabled",
-			SettingDescription = "If [Enabled], pressing J (or what ever keybind from DropAndSetObjectTypePositionKey) will set an objects item type location for organization",
+			SettingDescription = "If [Enabled], pressing J (or what ever keybind from SetObjectTypePositionKey) will set an objects item type location for organization",
 		};
 
 		public static ConfigSetupString UseOneHandedPlacementOverrides = new ConfigSetupString()
@@ -85,7 +109,7 @@ namespace ShipMaid.Configuration
 			pluginName = "ShipMaid",
 			SettingName = "UseOneHandedPlacementOverrides",
 			SettingValue = "Disabled",
-			SettingDescription = "If [Enabled], pressing J (or what ever keybind from DropAndSetObjectTypePositionKey) with a one handed object will set all one handed objects location for organization",
+			SettingDescription = "If [Enabled], pressing J (or what ever keybind from SetObjectTypePositionKey) with a one handed object will set all one handed objects location for organization",
 		};
 
 		public static ConfigSetupString UseTwoHandedPlacementOverrides = new ConfigSetupString()
@@ -93,7 +117,7 @@ namespace ShipMaid.Configuration
 			pluginName = "ShipMaid",
 			SettingName = "UseTwoHandedPlacementOverrides",
 			SettingValue = "Disabled",
-			SettingDescription = "If [Enabled], pressing J (or what ever keybind from DropAndSetObjectTypePositionKey) with a two handed object will set all two handed objects location for organization",
+			SettingDescription = "If [Enabled], pressing J (or what ever keybind from SetObjectTypePositionKey) with a two handed object will set all two handed objects location for organization",
 		};
 
 		public static void BindConfigSettings()
@@ -108,8 +132,11 @@ namespace ShipMaid.Configuration
 			currentConfigEntries = SortingLocationBlacklist.Bind(currentConfigEntries);
 			currentConfigEntries = ShipMaidSetObjectTypePositionInputAction.Bind(currentConfigEntries);
 			currentConfigEntries = UseItemTypePlacementOverrides.Bind(currentConfigEntries);
+			currentConfigEntries = ItemPlacementOverrideLocation.Bind(currentConfigEntries);
 			currentConfigEntries = UseOneHandedPlacementOverrides.Bind(currentConfigEntries);
+			currentConfigEntries = OneHandedItemPlacementOverrideLocation.Bind(currentConfigEntries);
 			currentConfigEntries = UseTwoHandedPlacementOverrides.Bind(currentConfigEntries);
+			currentConfigEntries = TwoHandedItemPlacementOverrideLocation.Bind(currentConfigEntries);
 
 			TryRemoveOldConfigSettings();
 		}

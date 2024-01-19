@@ -15,8 +15,9 @@ namespace ShipMaid
 	internal class ShipMaidFunctions
 	{
 		public static List<GrabbableObjectPositionHelper> GrabbablesPositions = new();
-		public static List<GrabbableObjectPositionHelper> OneHandedPositions = new();
-		public static List<GrabbableObjectPositionHelper> TwoHandedPositions = new();
+		public static Vector3 OneHandedPosition = new(UnsetPosition.x, UnsetPosition.y, UnsetPosition.z);
+		public static Vector3 TwoHandedPosition = new(UnsetPosition.x, UnsetPosition.y, UnsetPosition.z);
+		public static Vector3 UnsetPosition = new(-9f, -9f, -9f);
 
 		internal static void DropAndSetObjectTypePosition()
 		{
@@ -24,35 +25,33 @@ namespace ShipMaid
 			GrabbableObject obj = GetCurrentlyHeldObject();
 			if (obj != null)
 			{
-				if (GrabbablesPositions.Where(o => o.obj.name == obj.name).Any())
+				Vector3 goPos = obj.gameObject.transform.position;
+				if (GrabbablesPositions.Where(o => o.objName == obj.name).Any())
 				{
-					GrabbablesPositions.Where(o => o.obj.name == obj.name).First().PlacementPosition = obj.gameObject.transform.position;
+					GrabbablesPositions.Where(o => o.objName == obj.name).First().PlacementPosition = new(goPos.x, goPos.y, goPos.z);
+					GrabbableObjectPositionHelper goph = new(obj.name, goPos);
+					ConfigSettings.ItemPlacementOverrideLocation.AddOrUpdateObjectPositionSetting(goph);
+					ShipMaid.instance.Config.Save();
 				}
 				else
 				{
-					GrabbablesPositions.Add(new(obj, obj.gameObject.transform.position));
+					GrabbablesPositions.Add(new(obj.name, goPos));
+					GrabbableObjectPositionHelper goph = new(obj.name, goPos);
+					ConfigSettings.ItemPlacementOverrideLocation.AddOrUpdateObjectPositionSetting(goph);
+					ShipMaid.instance.Config.Save();
 				}
 				if (obj.itemProperties.twoHanded)
 				{
-					if (TwoHandedPositions.Where(o => o.obj.itemProperties.twoHanded == true).Any())
-					{
-						TwoHandedPositions.Where(o => o.obj.itemProperties.twoHanded == true).First().PlacementPosition = obj.gameObject.transform.position;
-					}
-					else
-					{
-						TwoHandedPositions.Add(new(obj, obj.gameObject.transform.position));
-					}
+					TwoHandedPosition = new(goPos.x, goPos.y, goPos.z);
+					ConfigSettings.TwoHandedItemPlacementOverrideLocation.SetVector3(TwoHandedPosition);
+					ShipMaid.instance.Config.Save();
 				}
 				else
 				{
-					if (OneHandedPositions.Where(o => o.obj.itemProperties.twoHanded == false).Any())
-					{
-						OneHandedPositions.Where(o => o.obj.itemProperties.twoHanded == false).First().PlacementPosition = obj.gameObject.transform.position;
-					}
-					else
-					{
-						OneHandedPositions.Add(new(obj, obj.gameObject.transform.position));
-					}
+					ShipMaid.LogError($"Updating OneHanded Position");
+					OneHandedPosition = new(goPos.x, goPos.y, goPos.z);
+					ConfigSettings.OneHandedItemPlacementOverrideLocation.SetVector3(OneHandedPosition);
+					ShipMaid.instance.Config.Save();
 				}
 				//Keybinds.localPlayerController.PlaceGrabbableObject(HangarShipHelper.GetShipTransform(), Keybinds.localPlayerController.transform.position, true, obj);
 				//Keybinds.localPlayerController.PlaceGrabbableObject(HangarShipHelper.GetShipTransform(), new(0f, 0f, 0f), true, obj);
@@ -79,29 +78,29 @@ namespace ShipMaid
 
 		internal static GrabbableObjectPositionHelper GetObjectPositionTarget(GrabbableObject obj)
 		{
-			if (GrabbablesPositions.Where(o => o.obj.name == obj.name).Any())
+			if (GrabbablesPositions.Where(o => o.objName == obj.name).Any())
 			{
-				return GrabbablesPositions.Where(o => o.obj.name == obj.name).First();
+				return GrabbablesPositions.Where(o => o.objName == obj.name).First();
 			}
 
 			return null;
 		}
 
-		internal static GrabbableObjectPositionHelper GetOneHandedPositionTarget()
+		internal static Vector3? GetOneHandedPositionTarget()
 		{
-			if (OneHandedPositions.Where(o => o.obj.itemProperties.twoHanded == false).Any())
+			if (OneHandedPosition != UnsetPosition)
 			{
-				return OneHandedPositions.Where(o => o.obj.itemProperties.twoHanded == false).First();
+				return OneHandedPosition;
 			}
 
 			return null;
 		}
 
-		internal static GrabbableObjectPositionHelper GetTwoHandedPositionTarget()
+		internal static Vector3? GetTwoHandedPositionTarget()
 		{
-			if (TwoHandedPositions.Where(o => o.obj.itemProperties.twoHanded == true).Any())
+			if (TwoHandedPosition != UnsetPosition)
 			{
-				return TwoHandedPositions.Where(o => o.obj.itemProperties.twoHanded == true).First();
+				return TwoHandedPosition;
 			}
 
 			return null;
@@ -114,54 +113,72 @@ namespace ShipMaid
 			var allItems = hsh.FindAllScrapShip();
 			if (ConfigSettings.UseItemTypePlacementOverrides.Key.Value == "Enabled")
 			{
-				foreach (var obj in allItems)
+				var itemPlacementListConfig = ConfigSettings.ItemPlacementOverrideLocation.GetObjectPositionList(ConfigSettings.ItemPlacementOverrideLocation.Key.Value);
+				if (itemPlacementListConfig.Count > 0 && itemPlacementListConfig.First().objName != "name")
 				{
-					if (ItemsForStorageCloset.Where(ifsc => ifsc.Equals(obj.name)).Any())
-						continue;
-					if (GrabbablesPositions.Where(o => o.obj.name == obj.name).Any())
+					foreach (var itemPlacement in itemPlacementListConfig)
 					{
-						GrabbablesPositions.Where(o => o.obj.name == obj.name).First().PlacementPosition = obj.gameObject.transform.position;
+						GrabbablesPositions.Add(itemPlacement);
 					}
-					else
+				}
+				else
+				{
+					foreach (var obj in allItems)
 					{
-						GrabbablesPositions.Add(new(obj, obj.gameObject.transform.position));
+						if (ItemsForStorageCloset.Where(ifsc => ifsc.Equals(obj.name)).Any())
+							continue;
+						if (GrabbablesPositions.Where(o => o.objName == obj.name).Any())
+						{
+							GrabbablesPositions.Where(o => o.objName == obj.name).First().PlacementPosition = obj.gameObject.transform.position;
+						}
+						else
+						{
+							GrabbablesPositions.Add(new(obj.name, obj.gameObject.transform.position));
+						}
 					}
 				}
 			}
 			if (ConfigSettings.UseOneHandedPlacementOverrides.Key.Value == "Enabled")
 			{
-				foreach (var obj in allItems)
+				if (ConfigSettings.OneHandedItemPlacementOverrideLocation.GetVector3(ConfigSettings.OneHandedItemPlacementOverrideLocation.Key.Value, out Vector3 oneHandedOverrideLocation))
 				{
-					if (ItemsForStorageCloset.Where(ifsc => ifsc.Equals(obj.name)).Any())
-						continue;
-					if (!obj.itemProperties.twoHanded)
+					OneHandedPosition = oneHandedOverrideLocation;
+				}
+				else
+				{
+					foreach (var obj in allItems)
 					{
-						if (OneHandedPositions.Where(o => o.obj.itemProperties.twoHanded == false).Any())
+						if (ItemsForStorageCloset.Where(ifsc => ifsc.Equals(obj.name)).Any())
+							continue;
+						if (!obj.itemProperties.twoHanded)
 						{
-							OneHandedPositions.Where(o => o.obj.itemProperties.twoHanded != true).First().PlacementPosition = obj.gameObject.transform.position;
-						}
-						else
-						{
-							OneHandedPositions.Add(new(obj, obj.gameObject.transform.position));
+							if (OneHandedPosition == UnsetPosition)
+							{
+								OneHandedPosition = obj.gameObject.transform.position;
+							}
 						}
 					}
 				}
 			}
 			if (ConfigSettings.UseTwoHandedPlacementOverrides.Key.Value == "Enabled")
 			{
-				foreach (var obj in allItems)
+				if (ConfigSettings.TwoHandedItemPlacementOverrideLocation.GetVector3(ConfigSettings.TwoHandedItemPlacementOverrideLocation.Key.Value, out Vector3 twoHandedOverrideLocation))
 				{
-					if (ItemsForStorageCloset.Where(ifsc => ifsc.Equals(obj.name)).Any())
-						continue;
-					if (obj.itemProperties.twoHanded)
+					TwoHandedPosition = twoHandedOverrideLocation;
+				}
+				else
+				{
+					foreach (var obj in allItems)
 					{
-						if (TwoHandedPositions.Where(o => o.obj.itemProperties.twoHanded == true).Any())
+						if (ItemsForStorageCloset.Where(ifsc => ifsc.Equals(obj.name)).Any())
+							continue;
+						if (obj.itemProperties.twoHanded)
 						{
-							TwoHandedPositions.Where(o => o.obj.itemProperties.twoHanded == true).First().PlacementPosition = obj.gameObject.transform.position;
-						}
-						else
-						{
-							TwoHandedPositions.Add(new(obj, obj.gameObject.transform.position));
+							if (TwoHandedPosition == UnsetPosition)
+							{
+								TwoHandedPosition = obj.gameObject.transform.position;
+								break;
+							}
 						}
 					}
 				}

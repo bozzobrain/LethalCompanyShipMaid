@@ -5,21 +5,21 @@ using UnityEngine;
 
 namespace ShipMaid.ObjectHelpers
 {
-	internal class GrabbableObjectPositionHelper
+	public class GrabbableObjectPositionHelper
 	{
-		public GrabbableObject obj;
+		public string objName;
 
 		public Vector3 PlacementPosition;
 
-		public GrabbableObjectPositionHelper(GrabbableObject o, Vector3 pos)
+		public GrabbableObjectPositionHelper(string name, Vector3 pos)
 		{
-			obj = o;
+			objName = name;
 			PlacementPosition = pos;
 		}
 
-		public GrabbableObjectPositionHelper(GrabbableObject o, float xPos, float yPos, float zPos)
+		public GrabbableObjectPositionHelper(string name, float xPos, float yPos, float zPos)
 		{
-			obj = o;
+			objName = name;
 			PlacementPosition = new(xPos, yPos, zPos);
 		}
 	}
