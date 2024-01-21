@@ -258,7 +258,7 @@ namespace ShipMaid.HelperFunctions
 						if (!PositionHelperFunctions.SameLocation(obj.transform.position, placementPosition))
 						{
 							ShipMaid.Log($"Moving item to ship - {obj.name} - {placementPosition.x},{placementPosition.y},{placementPosition.z}");
-							NetworkingObjectManager.MakeObjectFallRpc(obj, placementPosition, true);
+							NetworkingObjectManager.RunClientRpc(obj.NetworkObject, placementPosition, true);
 							if (!hsh.IsObjectWithinShip(obj))
 							{
 								ShipMaid.Log($"Found item outside of the ship - {obj.name}");

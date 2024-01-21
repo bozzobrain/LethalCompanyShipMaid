@@ -107,6 +107,9 @@ A mod where the ship and the storage closet is cleaned up when you press the ass
 			- "posx,posy,posz"
 		
 # Changes
+- V3.2.5
+	- Overhauled some backend networking things to be compliant around either LC-API or other mods that were breaking things
+	- Thanks to [HiiJustin](https://github.com/HiiJustin) for the relaying information
 - V3.2.4
 	- Introduced the configuration file handling of item positions for all placement overrides
 	- Now placements locations for all overrides are stored in the config file and will persist across game resets and different save files.

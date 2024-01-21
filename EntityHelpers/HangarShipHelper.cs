@@ -136,7 +136,7 @@ namespace ShipMaid.EntityHelpers
 			obj.transform.SetParent(ShipObject.transform);
 			obj.OnBroughtToShip();
 
-			NetworkingObjectManager.MakeObjectFallRpc(obj, GetShipCenterLocation(), true);
+			NetworkingObjectManager.RunClientRpc(obj.NetworkObject, GetShipCenterLocation(), true);
 			return;
 		}
 

@@ -283,6 +283,10 @@
     <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.2" PrivateAssets="all" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Patchers\" />
+  </ItemGroup>
+
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
     <Exec Command="xcopy /y /d  &quot;$(TargetDir)$(TargetFileName)&quot; &quot;D:/SteamLibrary/steamapps/common/Lethal Company/BepInEx/plugins&quot;&#xD;&#xA;xcopy /y /d  &quot;$(TargetDir)$(TargetFileName)&quot; &quot;C:\Users\kilbu\Desktop\Lethal Company\BepInEx\plugins&quot;&#xD;&#xA;xcopy /y /d  &quot;$(TargetDir)$(TargetFileName)&quot; &quot;ZipRelease&quot;&#xD;&#xA;xcopy /y /d  &quot;Readme.md&quot; &quot;ZipRelease&quot;&#xD;&#xA;xcopy /y /d  &quot;manifest.json&quot; &quot;ZipRelease&quot;&#xD;&#xA;" />
   </Target>

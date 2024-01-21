@@ -9,64 +9,7 @@ namespace ShipMaid.Networking
 	{
 		public class NetworkingObjectManager : NetworkBehaviour
 		{
-			public static PlayerControllerB localPlayerController;
-
-			public static NetworkingObjectManager GetNetworkingObjectManager()
-			{
-				GameObject terminal = GameObject.Find("/Environment/HangarShip/Terminal");
-				if (terminal != null)
-				{
-					ShipMaid.Log($"Terminal found {terminal.name}");
-					return terminal.GetComponentInChildren<NetworkingObjectManager>();
-				}
-				return null;
-			}
-
-			public static void MakeObjectFallRpc(GrabbableObject obj, Vector3 placementPosition, bool shipParent)
-			{
-				var pni = GetNetworkingObjectManager();
-
-				if (pni != null)
-				{
-					ShipMaid.Log($"NetworkingObjectManager - Network behavior found {pni.name}");
-					pni.RunClientRpc(obj.NetworkObject, placementPosition, shipParent);
-				}
-				else
-				{
-					ShipMaid.Log($"NetworkingObjectManager not found ");
-				}
-			}
-
-			public static void NetworkManagerInit()
-			{
-				ShipMaid.Log("Registering named message");
-				NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("MakeObjectFall", (senderClientId, reader) =>
-				{
-					if (senderClientId != localPlayerController.playerClientId)
-					{
-						reader.ReadValueSafe(out NetworkObjectReference value, default);
-						reader.ReadValueSafe(out Vector3 value3);
-						reader.ReadValueSafe(out bool shipParent);
-						if (value.TryGet(out var networkObject))
-						{
-							GrabbableObject component = networkObject.GetComponent<GrabbableObject>();
-
-							GetNetworkingObjectManager().MakeObjectFall(component, value3, shipParent);
-						}
-					}
-				});
-			}
-
-			[HarmonyPatch(typeof(PlayerControllerB), "ConnectClientToPlayerObject")]
-			[HarmonyPostfix]
-			public static void OnLocalPlayerConnect(PlayerControllerB __instance)
-			{
-				localPlayerController = __instance;
-				if (localPlayerController.IsClient)
-					NetworkManagerInit();
-			}
-
-			public void MakeObjectFall(GrabbableObject obj, Vector3 placementPosition, bool shipParent)
+			public static void MakeObjectFall(GrabbableObject obj, Vector3 placementPosition, bool shipParent)
 			{
 				GameObject ship = GameObject.Find("/Environment/HangarShip");
 				GameObject storageCloset = GameObject.Find("/Environment/HangarShip/StorageCloset");
@@ -102,9 +45,9 @@ namespace ShipMaid.Networking
 			}
 
 			[ClientRpc]
-			public void MakeObjectFallClientRpc(NetworkObjectReference obj, Vector3 placementPosition, bool shipParent)
+			public static void MakeObjectFallClientRpc(NetworkObjectReference obj, Vector3 placementPosition, bool shipParent)
 			{
-				NetworkManager networkManager = NetworkManager;
+				NetworkManager networkManager = NetworkManager.Singleton;
 				if ((object)networkManager == null || !networkManager.IsListening)
 				{
 					return;
@@ -119,7 +62,7 @@ namespace ShipMaid.Networking
 				if (obj.TryGet(out var networkObject))
 				{
 					GrabbableObject component = networkObject.GetComponent<GrabbableObject>();
-					if (!IsOwner)
+					if (!Keybinds.localPlayerController.IsOwner)
 					{
 						MakeObjectFall(component, placementPosition, shipParent);
 					}
@@ -127,15 +70,21 @@ namespace ShipMaid.Networking
 			}
 
 			[ServerRpc]
-			public void MakeObjectFallServerRpc(NetworkObjectReference obj, Vector3 placementPosition, bool shipParent)
+			public static void MakeObjectFallServerRpc(NetworkObjectReference obj, Vector3 placementPosition, bool shipParent)
 			{
-				NetworkManager networkManager = NetworkManager;
-				if ((object)networkManager == null || !networkManager.IsListening)
+				NetworkManager networkManager = NetworkManager.Singleton;
+				if ((object)networkManager == null)
 				{
+					ShipMaid.LogError("Network Manager == null");
+					return;
+				}
+				if (!networkManager.IsListening)
+				{
+					ShipMaid.LogError("Network Manager  not listening");
 					return;
 				}
 
-				if (OwnerClientId != networkManager.LocalClientId)
+				if (Keybinds.localPlayerController.OwnerClientId != networkManager.LocalClientId)
 				{
 					if (networkManager.LogLevel <= LogLevel.Normal)
 					{
@@ -154,15 +103,37 @@ namespace ShipMaid.Networking
 				if (obj.TryGet(out var networkObject))
 				{
 					GrabbableObject component = networkObject.GetComponent<GrabbableObject>();
-					if (!IsOwner)
-					{
-						MakeObjectFall(component, placementPosition, shipParent);
-					}
+
+					MakeObjectFall(component, placementPosition, shipParent);
+				}
+				else
+				{
+					ShipMaid.LogError("if (obj.TryGet(out var networkObject))");
 				}
 			}
 
+			public static void NetworkManagerInit()
+			{
+				ShipMaid.LogError("Registering named message");
+				NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("MakeObjectFall", (senderClientId, reader) =>
+				{
+					if (senderClientId != Keybinds.localPlayerController.playerClientId)
+					{
+						reader.ReadValueSafe(out NetworkObjectReference value, default);
+						reader.ReadValueSafe(out Vector3 value3);
+						reader.ReadValueSafe(out bool shipParent);
+						if (value.TryGet(out var networkObject))
+						{
+							GrabbableObject component = networkObject.GetComponent<GrabbableObject>();
+
+							MakeObjectFall(component, value3, shipParent);
+						}
+					}
+				});
+			}
+
 			[ClientRpc]
-			public void RunClientRpc(NetworkObjectReference obj, Vector3 placementPosition, bool shipParent)
+			public static void RunClientRpc(NetworkObjectReference obj, Vector3 placementPosition, bool shipParent)
 			{
 				MakeObjectFallServerRpc(obj, placementPosition, shipParent);
 			}

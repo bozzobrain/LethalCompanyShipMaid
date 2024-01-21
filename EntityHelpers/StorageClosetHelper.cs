@@ -161,7 +161,7 @@ namespace ShipMaid.EntityHelpers
 				}
 				ShipMaid.Log($"Placing {obj.name} [{i + 1} of {objectsOfType.Count}] on shelve {shelveToPlaceOn} at {placementLocation.x},{placementLocation.y},{placementLocation.z}");
 
-				NetworkingObjectManager.MakeObjectFallRpc(obj, placementLocation, false);
+				NetworkingObjectManager.RunClientRpc(obj.NetworkObject, placementLocation, false);
 
 				placementLocationX += StorageLocationXStepSize;
 			}

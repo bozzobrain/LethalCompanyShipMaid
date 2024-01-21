@@ -2,8 +2,10 @@
 using HarmonyLib;
 using ShipMaid.Configuration;
 using ShipMaid.HelperFunctions;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using static ShipMaid.Networking.NetworkFunctions;
 using static UnityEngine.InputSystem.InputAction;
 
 namespace ShipMaid
@@ -62,6 +64,11 @@ namespace ShipMaid
 			{
 				SubscribeToEvents();
 			}
+			ShipMaid.LogError("Local Player Connect");
+
+			NetworkingObjectManager.NetworkManagerInit();
+
+			ShipMaid.LogError("Registering Manager");
 		}
 
 		private static void OnShipMaidClosetCleanupCalled(CallbackContext context)
