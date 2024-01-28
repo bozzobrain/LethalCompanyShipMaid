@@ -152,7 +152,7 @@ namespace ShipMaid.Configuration
 			}
 			try
 			{
-				ShipMaid.Log("Cleaning old config entries");
+				//ShipMaid.Log("Cleaning old config entries");
 				ConfigFile config = ShipMaid.instance.Config;
 				string configFilePath = config.ConfigFilePath;
 				if (!File.Exists(configFilePath))

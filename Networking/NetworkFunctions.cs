@@ -33,7 +33,7 @@ namespace ShipMaid.Networking
 					targetlocation = placementPosition;
 					debugLocation = "storage";
 				}
-				ShipMaid.Log($"Request to make GrabbableObject {obj.name} fall to ground in {debugLocation} - {targetlocation.x},{targetlocation.y},{targetlocation.z}");
+				//ShipMaid.Log($"Request to make GrabbableObject {obj.name} fall to ground in {debugLocation} - {targetlocation.x},{targetlocation.y},{targetlocation.z}");
 				obj.gameObject.transform.SetPositionAndRotation(placementPosition, obj.transform.rotation);
 				obj.hasHitGround = false;
 				obj.startFallingPosition = placementPosition;
@@ -88,7 +88,7 @@ namespace ShipMaid.Networking
 				{
 					if (networkManager.LogLevel <= LogLevel.Normal)
 					{
-						Debug.LogError("Only the owner can invoke a ServerRpc that requires ownership!");
+						ShipMaid.LogError("Only the owner can invoke a ServerRpc that requires ownership!");
 					}
 
 					return;
@@ -106,15 +106,11 @@ namespace ShipMaid.Networking
 
 					MakeObjectFall(component, placementPosition, shipParent);
 				}
-				else
-				{
-					ShipMaid.LogError("if (obj.TryGet(out var networkObject))");
-				}
 			}
 
 			public static void NetworkManagerInit()
 			{
-				ShipMaid.LogError("Registering named message");
+				ShipMaid.Log("Registering named message");
 				NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("MakeObjectFall", (senderClientId, reader) =>
 				{
 					if (senderClientId != Keybinds.localPlayerController.playerClientId)

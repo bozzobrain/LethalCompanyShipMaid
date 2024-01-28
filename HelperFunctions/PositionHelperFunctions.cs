@@ -40,12 +40,12 @@ namespace ShipMaid.HelperFunctions
 
 		public static bool IsPositionWithinBounds(Vector3 testPosition, Vector3 boundingPositionMin, Vector3 boundingPositionMax)
 		{
-			return (testPosition.x < boundingPositionMax.x) &&
-				(testPosition.y < boundingPositionMax.y) &&
-				(testPosition.z < boundingPositionMax.z) &&
-				(testPosition.x > boundingPositionMin.x) &&
-				(testPosition.y > boundingPositionMin.y) &&
-				(testPosition.z > boundingPositionMin.z);
+			return (testPosition.x <= boundingPositionMax.x) &&
+				(testPosition.y <= boundingPositionMax.y) &&
+				(testPosition.z <= boundingPositionMax.z) &&
+				(testPosition.x >= boundingPositionMin.x) &&
+				(testPosition.y >= boundingPositionMin.y) &&
+				(testPosition.z >= boundingPositionMin.z);
 		}
 
 		public static bool NearLocation(float f1, float f2, float offset)

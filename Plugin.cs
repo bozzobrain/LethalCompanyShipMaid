@@ -12,7 +12,7 @@ namespace ShipMaid
 		public static ShipMaidFunctions smf = new();
 		private const string GUID = "ShipMaid";
 		private const string NAME = "ShipMaid";
-		private const string VERSION = "3.2.5";
+		private const string VERSION = "3.2.6";
 
 		public static void Log(string message)
 		{

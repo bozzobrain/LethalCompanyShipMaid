@@ -50,7 +50,7 @@ namespace ShipMaid.Configuration
 				if (float.TryParse(S_x, out float x) && float.TryParse(S_y, out float y) && float.TryParse(S_z, out float z))
 				{
 					resultVector = new(x, y, z);
-					ShipMaid.LogError($"Parsed config setting Vector3 {resultVector.x},{resultVector.y},{resultVector.z}");
+					//ShipMaid.Log($"Parsed config setting Vector3 {resultVector.x},{resultVector.y},{resultVector.z}");
 					return true;
 				}
 			}

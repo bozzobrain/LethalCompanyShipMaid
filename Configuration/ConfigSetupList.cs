@@ -43,7 +43,7 @@ namespace ShipMaid.Configuration
 			{
 				string item = ItemMatch.Groups["item"].ToString();
 				results.Add(ItemMatch.Groups["item"].ToString());
-				ShipMaid.Log($"Got configuration item {item}");
+				//ShipMaid.Log($"Got configuration item {item}");
 			}
 
 			return results;

@@ -192,12 +192,12 @@ namespace ShipMaid.HelperFunctions
 					}
 					else if (ShipMaidFunctions.GetTwoHandedPositionTarget() is Vector3 goph_TwoHanded && goph_TwoHanded != null && ConfigSettings.UseTwoHandedPlacementOverrides.Key.Value == "Enabled" && twoHanded)
 					{
-						ShipMaid.LogError($"Setting Two Handed position from memory for {firstObjectOfType.name} - {goph_TwoHanded.x},{goph_TwoHanded.y},{goph_TwoHanded.z}");
+						ShipMaid.Log($"Setting Two Handed position from memory for {firstObjectOfType.name} - {goph_TwoHanded.x},{goph_TwoHanded.y},{goph_TwoHanded.z}");
 						placementPosition = goph_TwoHanded;
 					}
 					else if (ShipMaidFunctions.GetOneHandedPositionTarget() is Vector3 goph_OneHanded && goph_OneHanded != null && ConfigSettings.UseOneHandedPlacementOverrides.Key.Value == "Enabled" && !twoHanded)
 					{
-						ShipMaid.LogError($"Setting One Handed position from memory for {firstObjectOfType.name} - {goph_OneHanded.x},{goph_OneHanded.y},{goph_OneHanded.z}");
+						ShipMaid.Log($"Setting One Handed position from memory for {firstObjectOfType.name} - {goph_OneHanded.x},{goph_OneHanded.y},{goph_OneHanded.z}");
 						placementPosition = goph_OneHanded;
 					}
 					else
@@ -250,18 +250,18 @@ namespace ShipMaid.HelperFunctions
 						if (!hsh.IsPositionWithinShip(placementPosition))
 						{
 							var newPosition = hsh.AdjustPositionWithinShip(placementPosition);
-							ShipMaid.LogError($"Ship loot detected outside of ship - {obj.name} - {placementPosition.x},{placementPosition.y},{placementPosition.z}");
+							ShipMaid.Log($"Ship loot detected outside of ship - {obj.name} - {placementPosition.x},{placementPosition.y},{placementPosition.z} - ship bounds {HangarShipHelper.GetDebugLocationShip(obj.gameObject.transform.position)}");
 							placementPosition = new(newPosition.x, newPosition.y, newPosition.z);
-							ShipMaid.LogError($"Corrected to- {obj.name} - {placementPosition.x},{placementPosition.y},{placementPosition.z}");
+							ShipMaid.Log($"Corrected to- {obj.name} - {placementPosition.x},{placementPosition.y},{placementPosition.z}");
 						}
 						// Move the object if position needs adjusted
 						if (!PositionHelperFunctions.SameLocation(obj.transform.position, placementPosition))
 						{
-							ShipMaid.Log($"Moving item to ship - {obj.name} - {placementPosition.x},{placementPosition.y},{placementPosition.z}");
+							ShipMaid.Log($"Moving item - {obj.name} to {placementPosition.x},{placementPosition.y},{placementPosition.z}");
 							NetworkingObjectManager.RunClientRpc(obj.NetworkObject, placementPosition, true);
 							if (!hsh.IsObjectWithinShip(obj))
 							{
-								ShipMaid.Log($"Found item outside of the ship - {obj.name}");
+								ShipMaid.Log($"Found item outside of the ship - {obj.name} - where ship bounds are {HangarShipHelper.GetDebugLocationShip(obj.gameObject.transform.position)}");
 							}
 						}
 					}

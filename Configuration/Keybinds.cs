@@ -64,11 +64,11 @@ namespace ShipMaid
 			{
 				SubscribeToEvents();
 			}
-			ShipMaid.LogError("Local Player Connect");
+			ShipMaid.Log("Local Player Connect");
 
 			NetworkingObjectManager.NetworkManagerInit();
 
-			ShipMaid.LogError("Registering Manager");
+			ShipMaid.Log("Registering Manager");
 		}
 
 		private static void OnShipMaidClosetCleanupCalled(CallbackContext context)

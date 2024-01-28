@@ -48,7 +48,7 @@ namespace ShipMaid
 				}
 				else
 				{
-					ShipMaid.LogError($"Updating OneHanded Position");
+					//ShipMaid.Log($"Updating OneHanded Position");
 					OneHandedPosition = new(goPos.x, goPos.y, goPos.z);
 					ConfigSettings.OneHandedItemPlacementOverrideLocation.SetVector3(OneHandedPosition);
 					ShipMaid.instance.Config.Save();
@@ -60,17 +60,22 @@ namespace ShipMaid
 			}
 			else
 			{
-				ShipMaid.Log($"DropAndSetObjectTypePosition - No object held found");
+				ShipMaid.LogError($"Failed to get held object");
 			}
 		}
 
 		internal static GrabbableObject GetCurrentlyHeldObject()
 		{
-			for (int i = 0; i < Keybinds.localPlayerController.ItemSlots.Count(); i++)
+			if (Keybinds.localPlayerController != null)
 			{
-				if (Keybinds.localPlayerController.ItemSlots[i].isHeld && !Keybinds.localPlayerController.ItemSlots[i].isPocketed)
+				for (int i = 0; i < Keybinds.localPlayerController.ItemSlots.Count(); i++)
 				{
-					return Keybinds.localPlayerController.ItemSlots[i];
+					//ShipMaid.LogError($"{i}/{Keybinds.localPlayerController.ItemSlots.Count()} - {Keybinds.localPlayerController.ItemSlots[i].name}");
+					if (Keybinds.localPlayerController.ItemSlots[i].isHeld && !Keybinds.localPlayerController.ItemSlots[i].isPocketed)
+					{
+						//ShipMaid.LogError($"{i}/{Keybinds.localPlayerController.ItemSlots.Count()} - {Keybinds.localPlayerController.ItemSlots[i].name} - Valid Item");
+						return Keybinds.localPlayerController.ItemSlots[i];
+					}
 				}
 			}
 			return null;

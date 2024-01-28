@@ -84,7 +84,7 @@ namespace ShipMaid.Configuration
 		{
 			List<GrabbableObjectPositionHelper> resultPositions = new();
 
-			Regex ItemMatches = new Regex(@"((?<name>[A-Za-z\(\)]+)[,](?<posx>[-]*[\d]+[.][\d]+)[,](?<posy>[-]*[\d]+[.][\d]+)[,](?<posz>[-]*[\d]+[.][\d]+)[,]*)");
+			Regex ItemMatches = new Regex(@"((?<name>[A-Za-z\d\(\)]+)[,](?<posx>[-]*[\d]+[.][\d]+)[,](?<posy>[-]*[\d]+[.][\d]+)[,](?<posz>[-]*[\d]+[.][\d]+)[,]*)");
 			var result = ItemMatches.Matches(configSetting);
 			foreach (Match ItemMatch in result)
 			{
@@ -96,7 +96,7 @@ namespace ShipMaid.Configuration
 				{
 					GrabbableObjectPositionHelper goph = new(name, x, y, z);
 					resultPositions.Add(goph);
-					ShipMaid.LogError($"Parsed config setting GrabbleObjectPositionHelper {goph.objName},{goph.PlacementPosition.x},{goph.PlacementPosition.y},{goph.PlacementPosition.z}");
+					//ShipMaid.Log($"Parsed config setting GrabbleObjectPositionHelper {goph.objName},{goph.PlacementPosition.x},{goph.PlacementPosition.y},{goph.PlacementPosition.z}");
 				}
 			}
 
