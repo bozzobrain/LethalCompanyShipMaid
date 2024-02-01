@@ -115,14 +115,13 @@ namespace ShipMaid.Networking
 				{
 					if (senderClientId != Keybinds.localPlayerController.playerClientId)
 					{
-						reader.ReadValueSafe(out NetworkObjectReference value, default);
-						reader.ReadValueSafe(out Vector3 value3);
+						reader.ReadValueSafe(out NetworkObjectReference GrabbableObjectRef, default);
+						reader.ReadValueSafe(out Vector3 position);
 						reader.ReadValueSafe(out bool shipParent);
-						if (value.TryGet(out var networkObject))
+						if (GrabbableObjectRef.TryGet(out var GrabbableObjectNetworkObj))
 						{
-							GrabbableObject component = networkObject.GetComponent<GrabbableObject>();
-
-							MakeObjectFall(component, value3, shipParent);
+							GrabbableObject component = GrabbableObjectNetworkObj.GetComponent<GrabbableObject>();
+							MakeObjectFall(component, position, shipParent);
 						}
 					}
 				});

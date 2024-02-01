@@ -32,6 +32,21 @@ namespace ShipMaid.Configuration
 			SettingDescription = "Name and location of the item location (if UseItemTypePlacementOverrides is enabled)",
 		};
 
+
+		public static ConfigSetupFloat ItemPlacementOverrideOffsetRotation = new()
+		{
+			pluginName = "ShipMaid",
+			SettingName = "ItemPlacementOverrideOffsetRotation",
+			SettingValue = "10",
+			SettingDescription = "Float rotation variation of items within a stack of items (if UseOneHandedPlacementOverrides or UseTwoHandedPlacementOverrides is enabled)",
+		};
+		public static ConfigSetupVector3 ItemPlacementOverrideOffsetPosition = new()
+		{
+			pluginName = "ShipMaid",
+			SettingName = "ItemPlacementOverrideOffsetPosition",
+			SettingValue = "0.10,0.10,0.10",
+			SettingDescription = "Vector3 variation of items within a stack of items (if UseOneHandedPlacementOverrides or UseTwoHandedPlacementOverrides is enabled)",
+		};
 		public static ConfigSetupVector3 OneHandedItemPlacementOverrideLocation = new()
 		{
 			pluginName = "ShipMaid",
@@ -137,7 +152,9 @@ namespace ShipMaid.Configuration
 			currentConfigEntries = OneHandedItemPlacementOverrideLocation.Bind(currentConfigEntries);
 			currentConfigEntries = UseTwoHandedPlacementOverrides.Bind(currentConfigEntries);
 			currentConfigEntries = TwoHandedItemPlacementOverrideLocation.Bind(currentConfigEntries);
-
+			currentConfigEntries = ItemPlacementOverrideOffsetPosition.Bind(currentConfigEntries);
+			currentConfigEntries = ItemPlacementOverrideOffsetRotation.Bind(currentConfigEntries);
+			
 			TryRemoveOldConfigSettings();
 		}
 

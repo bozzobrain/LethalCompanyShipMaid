@@ -14,7 +14,6 @@ namespace ShipMaid.HelperFunctions
 	{
 		private static List<string> ItemsForStorageCloset = ConfigSettings.ClosetLocationOverride.GetStrings(ConfigSettings.ClosetLocationOverride.Key.Value);
 		private static List<string> SortingBlacklist = ConfigSettings.SortingLocationBlacklist.GetStrings(ConfigSettings.SortingLocationBlacklist.Key.Value);
-
 		/// <summary>
 		/// Organizes the scrap in the ship.
 		/// </summary>
@@ -185,6 +184,7 @@ namespace ShipMaid.HelperFunctions
 						if (ConfigSettings.ItemGrouping.Key.Value == "Loose") xPositionOffset *= 2.0f;
 					}
 					Vector3 placementPosition;
+					float placmentRotation = 0f;
 					if (ShipMaidFunctions.GetObjectPositionTarget(firstObjectOfType) is GrabbableObjectPositionHelper goph && goph != null && ConfigSettings.UseItemTypePlacementOverrides.Key.Value == "Enabled")
 					{
 						ShipMaid.Log($"Setting position from memory for {firstObjectOfType.name}");
@@ -193,11 +193,38 @@ namespace ShipMaid.HelperFunctions
 					else if (ShipMaidFunctions.GetTwoHandedPositionTarget() is Vector3 goph_TwoHanded && goph_TwoHanded != null && ConfigSettings.UseTwoHandedPlacementOverrides.Key.Value == "Enabled" && twoHanded)
 					{
 						ShipMaid.Log($"Setting Two Handed position from memory for {firstObjectOfType.name} - {goph_TwoHanded.x},{goph_TwoHanded.y},{goph_TwoHanded.z}");
+						
+						if (ConfigSettings.ItemPlacementOverrideOffsetPosition.GetVector3(ConfigSettings.ItemPlacementOverrideOffsetPosition.Key.Value, out Vector3 ItemPlacementWiggles))
+						{
+							System.Random r = new();
+							goph_TwoHanded.x = (float)r.NextDouble() * ItemPlacementWiggles.x;
+							goph_TwoHanded.y = (float)r.NextDouble() * ItemPlacementWiggles.y;
+							goph_TwoHanded.z = (float)r.NextDouble() * ItemPlacementWiggles.z;
+						}
+						if (ConfigSettings.ItemPlacementOverrideOffsetRotation.GetFloat(ConfigSettings.ItemPlacementOverrideOffsetRotation.Key.Value, out float ItemPlacementRot))
+						{
+							System.Random r = new();
+							placmentRotation = (float)r.NextDouble() * ItemPlacementRot;
+						}
 						placementPosition = goph_TwoHanded;
 					}
 					else if (ShipMaidFunctions.GetOneHandedPositionTarget() is Vector3 goph_OneHanded && goph_OneHanded != null && ConfigSettings.UseOneHandedPlacementOverrides.Key.Value == "Enabled" && !twoHanded)
 					{
 						ShipMaid.Log($"Setting One Handed position from memory for {firstObjectOfType.name} - {goph_OneHanded.x},{goph_OneHanded.y},{goph_OneHanded.z}");
+						
+						if (ConfigSettings.ItemPlacementOverrideOffsetPosition.GetVector3(ConfigSettings.ItemPlacementOverrideOffsetPosition.Key.Value, out Vector3 ItemPlacementWiggles))
+						{
+							System.Random r = new();
+							goph_OneHanded.x = (float)r.NextDouble() * ItemPlacementWiggles.x;
+							goph_OneHanded.y = (float)r.NextDouble() * ItemPlacementWiggles.y;
+							goph_OneHanded.z = (float)r.NextDouble() * ItemPlacementWiggles.z;
+						}
+						if (ConfigSettings.ItemPlacementOverrideOffsetRotation.GetFloat(ConfigSettings.ItemPlacementOverrideOffsetRotation.Key.Value, out float ItemPlacementRot))
+						{
+							System.Random r = new();
+							placmentRotation = (float)r.NextDouble() * ItemPlacementRot;
+						}
+						
 						placementPosition = goph_OneHanded;
 					}
 					else
