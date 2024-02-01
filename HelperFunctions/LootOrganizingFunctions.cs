@@ -222,7 +222,11 @@ namespace ShipMaid.HelperFunctions
 						// Make sure we dont move a held object
 						if (obj.isHeld)
 							continue;
-
+						if (obj.transform.parent.name.Contains("Wheelbarrow"))
+						{
+							ShipMaid.Log($"Ignoring {obj.name} that appears to be located in a Wheelbarrow/Shopping Cart");
+							continue;
+						}
 						// Choose how to organze each item of loot
 						if (ConfigSettings.OrganizationTechnique.Key.Value == "Value" && ConfigSettings.UseItemTypePlacementOverrides.Key.Value != "Enabled" && ConfigSettings.UseOneHandedPlacementOverrides.Key.Value != "Enabled" && ConfigSettings.UseTwoHandedPlacementOverrides.Key.Value != "Enabled")
 						{
