@@ -11,14 +11,29 @@ A mod where the ship and the storage closet is cleaned up when you press the ass
 ## Basics
 - Keypresses will organize each item type in groups by the name of the item
 	- Ship cleanup default keybinding is 'M'
-		- Items now are organized by [Value] by default. The futher from the door, the higher the value. Can also be [Stack] ed (See config settings)
-		- Items are grouped in two locations, front of ship and back of ship (See config settings)
+		- By default all objects not on the 'ClosetLocationOverride' list are organized
+		- You can override specific items to not be sorted by adding them to the config setting 'SortingDisabledList'
 	- Closet cleanup default keybinding is 'N'
 		- Items in the closet will be staggered slightly to the right of the 'first' item
+		- Can override which objects get automatically placed in the storage closet using Config setting 'ClosetLocationOverride'
 	- Set object location default keybinding is 'J'
 		- If UseOneHandedPlacementOverrides / UseTwoHandedPlacementOverrides / UseItemTypePlacementOverrides is enabled, pressing this keybind will log the location of the given item for future organization requests
 		- Object override locations are stored in the config file and will persist into other game files
-
+- Organization Methods
+	- Placement position overrides (3 Config Options)
+		- One-Handed Position Override
+			- If enabled, all one-handed objects will be placed in a single location
+			- Position is set either manually by the config file or by pressing J or whatever keybind you have set by 'SetObjectTypePositionKey'
+		- Two-Handed Position Override
+			- If enabled, all two-handed objects will be placed in a single location
+			- Position is set either manually by the config file or by pressing J or whatever keybind you have set by 'SetObjectTypePositionKey'
+		- Item Type Position Override 
+			- If enabled, all objects that have override locations will be placed in their designated location
+			- Position is set either manually by the config file or by pressing J or whatever keybind you have set by 'SetObjectTypePositionKey'
+	- Randomized placement
+		- Items now are organized by [Value] by default, the futher from the door, the higher the value. Can also be [Stack]-ed to place all objects of a type directly ontop of each other (See config setting 'ItemGrouping')
+		- Items are grouped in two locations, front of ship and back of ship (See config setting 'TwoHandedItemLocation')
+		- Items can be strewn accross the ship [Loose]-ly or [Tight]-ly packed on the wall opposite the default location of the Storage Closet (See config setting 'OrganizationTechniques')
 ## Config File Parameters
 - Keybinds
 	- CleanupShipKey
