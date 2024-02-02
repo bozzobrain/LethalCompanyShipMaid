@@ -38,6 +38,16 @@ namespace ShipMaid.HelperFunctions
 			return targetPosition;
 		}
 
+		public static string DebugQuaterion(Quaternion rot)
+		{
+			return rot.x.ToString() + "," + rot.y.ToString() + "," + rot.z.ToString() + "," + rot.w.ToString();
+		}
+
+		public static string DebugVector3(Vector3 pos)
+		{
+			return pos.x.ToString() + "," + pos.y.ToString() + "," + pos.z.ToString();
+		}
+
 		public static bool IsPositionWithinBounds(Vector3 testPosition, Vector3 boundingPositionMin, Vector3 boundingPositionMax)
 		{
 			return (testPosition.x <= boundingPositionMax.x) &&

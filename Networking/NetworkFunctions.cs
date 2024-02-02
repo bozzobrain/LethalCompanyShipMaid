@@ -9,7 +9,7 @@ namespace ShipMaid.Networking
 	{
 		public class NetworkingObjectManager : NetworkBehaviour
 		{
-			public static void MakeObjectFall(GrabbableObject obj, Vector3 placementPosition, bool shipParent)
+			public static void MakeObjectFall(GrabbableObject obj, Vector3 placementPosition, Quaternion placementRotation, bool shipParent)
 			{
 				GameObject ship = GameObject.Find("/Environment/HangarShip");
 				GameObject storageCloset = GameObject.Find("/Environment/HangarShip/StorageCloset");
@@ -34,9 +34,11 @@ namespace ShipMaid.Networking
 					debugLocation = "storage";
 				}
 				//ShipMaid.Log($"Request to make GrabbableObject {obj.name} fall to ground in {debugLocation} - {targetlocation.x},{targetlocation.y},{targetlocation.z}");
-				obj.gameObject.transform.SetPositionAndRotation(placementPosition, obj.transform.rotation);
+				obj.gameObject.transform.SetPositionAndRotation(placementPosition, placementRotation);
 				obj.hasHitGround = false;
 				obj.startFallingPosition = placementPosition;
+				//obj.itemProperties.restingRotation = placementRotation.eulerAngles;
+
 				if (obj.transform.parent != null)
 				{
 					obj.startFallingPosition = obj.transform.parent.InverseTransformPoint(obj.startFallingPosition);
@@ -45,7 +47,7 @@ namespace ShipMaid.Networking
 			}
 
 			[ClientRpc]
-			public static void MakeObjectFallClientRpc(NetworkObjectReference obj, Vector3 placementPosition, bool shipParent)
+			public static void MakeObjectFallClientRpc(NetworkObjectReference obj, Vector3 placementPosition, Quaternion placementRotation, bool shipParent)
 			{
 				NetworkManager networkManager = NetworkManager.Singleton;
 				if ((object)networkManager == null || !networkManager.IsListening)
@@ -56,6 +58,7 @@ namespace ShipMaid.Networking
 				FastBufferWriter bufferWriter = new FastBufferWriter(256, Unity.Collections.Allocator.Temp);
 				bufferWriter.WriteValueSafe(in obj, default);
 				bufferWriter.WriteValueSafe(in placementPosition);
+				bufferWriter.WriteValueSafe(in placementRotation);
 				bufferWriter.WriteValueSafe(shipParent);
 				NetworkManager.Singleton.CustomMessagingManager.SendNamedMessageToAll("MakeObjectFall", bufferWriter, NetworkDelivery.Reliable);
 
@@ -64,13 +67,13 @@ namespace ShipMaid.Networking
 					GrabbableObject component = networkObject.GetComponent<GrabbableObject>();
 					if (!Keybinds.localPlayerController.IsOwner)
 					{
-						MakeObjectFall(component, placementPosition, shipParent);
+						MakeObjectFall(component, placementPosition, placementRotation, shipParent);
 					}
 				}
 			}
 
 			[ServerRpc]
-			public static void MakeObjectFallServerRpc(NetworkObjectReference obj, Vector3 placementPosition, bool shipParent)
+			public static void MakeObjectFallServerRpc(NetworkObjectReference obj, Vector3 placementPosition, Quaternion placementRotation, bool shipParent)
 			{
 				NetworkManager networkManager = NetworkManager.Singleton;
 				if ((object)networkManager == null)
@@ -80,7 +83,7 @@ namespace ShipMaid.Networking
 				}
 				if (!networkManager.IsListening)
 				{
-					ShipMaid.LogError("Network Manager  not listening");
+					ShipMaid.LogError("Network Manager not listening");
 					return;
 				}
 
@@ -97,6 +100,7 @@ namespace ShipMaid.Networking
 				FastBufferWriter bufferWriter = new FastBufferWriter(256, Unity.Collections.Allocator.Temp);
 				bufferWriter.WriteValueSafe(in obj, default);
 				bufferWriter.WriteValueSafe(placementPosition);
+				bufferWriter.WriteValueSafe(placementRotation);
 				bufferWriter.WriteValueSafe(shipParent);
 				NetworkManager.Singleton.CustomMessagingManager.SendNamedMessageToAll("MakeObjectFall", bufferWriter, NetworkDelivery.Reliable);
 
@@ -104,7 +108,7 @@ namespace ShipMaid.Networking
 				{
 					GrabbableObject component = networkObject.GetComponent<GrabbableObject>();
 
-					MakeObjectFall(component, placementPosition, shipParent);
+					MakeObjectFall(component, placementPosition, placementRotation, shipParent);
 				}
 			}
 
@@ -117,20 +121,21 @@ namespace ShipMaid.Networking
 					{
 						reader.ReadValueSafe(out NetworkObjectReference GrabbableObjectRef, default);
 						reader.ReadValueSafe(out Vector3 position);
+						reader.ReadValueSafe(out Quaternion rotation);
 						reader.ReadValueSafe(out bool shipParent);
 						if (GrabbableObjectRef.TryGet(out var GrabbableObjectNetworkObj))
 						{
 							GrabbableObject component = GrabbableObjectNetworkObj.GetComponent<GrabbableObject>();
-							MakeObjectFall(component, position, shipParent);
+							MakeObjectFall(component, position, rotation, shipParent);
 						}
 					}
 				});
 			}
 
 			[ClientRpc]
-			public static void RunClientRpc(NetworkObjectReference obj, Vector3 placementPosition, bool shipParent)
+			public static void RunClientRpc(NetworkObjectReference obj, Vector3 placementPosition, Quaternion placementRotation, bool shipParent)
 			{
-				MakeObjectFallServerRpc(obj, placementPosition, shipParent);
+				MakeObjectFallServerRpc(obj, placementPosition, placementRotation, shipParent);
 			}
 		}
 	}
