@@ -30,7 +30,8 @@ A mod where the ship and the storage closet is cleaned up when you press the ass
 		- Item Type Position Override 
 			- If enabled, all objects that have override locations will be placed in their designated location
 			- Position is set either manually by the config file or by pressing J or whatever keybind you have set by 'SetObjectTypePositionKey'
-	- Randomized placement
+		- [ItemPlacementOverrideOffsetRotation] and [ItemPlacementOverrideOffsetPosition] allows for items to not be directly placed on each other in PositionOverride modes
+	- Randomized placement (Without position overrides)
 		- Items now are organized by [Value] by default, the futher from the door, the higher the value. Can also be [Stack]-ed to place all objects of a type directly ontop of each other (See config setting 'ItemGrouping')
 		- Items are grouped in two locations, front of ship and back of ship (See config setting 'TwoHandedItemLocation')
 		- Items can be strewn accross the ship [Loose]-ly or [Tight]-ly packed on the wall opposite the default location of the Storage Closet (See config setting 'OrganizationTechniques')
@@ -120,8 +121,22 @@ A mod where the ship and the storage closet is cleaned up when you press the ass
 		- Configuration will be automatically updated when the keybind is pressed in game
 		- Format is:
 			- "posx,posy,posz"
-		
+	- ItemPlacementOverrideOffsetPosition
+		- Randomizes the placement locations of items so that they do not stack directly on top of each other
+		- Each object has the ability to be offset from the 'Center' location by the some fractional amount in the config setting
+		- Format is:
+			- "posx,posy,posz"
+	- ItemPlacementOverrideOffsetRotation
+		- Randomizes the placement rotation of items so that they do not stack directly on top of each other
+		- Each object has the ability to be rotated from the by the some fractional amount in the config setting
+		- Format is:
+			- "###.#"
 # Changes
+- V4.0.0
+	- Introduced configuration settings for randomizing both position and rotation on object cleanups (Thanks to [Jonteiro](https://github.com/Jonteiro))
+	- See configuration settings [ItemPlacementOverrideOffsetRotation] and [ItemPlacementOverrideOffsetPosition]
+	- WARNING: This will break compatibility between previous versions of the plugin. Make sure all players are upto date on the plugin to not have issues.
+
 - V3.2.7
 	- Made a guard for moving items that are inside of the LateGamesUpgrade wheelbarrow due to a reported game crash (Thanks to [GrantisMantis](https://github.com/GrantisMantis)) 
 	- Guarded the keybinds when the user is typing in chat (Thanks to [jcsnider](https://github.com/jcsnider))

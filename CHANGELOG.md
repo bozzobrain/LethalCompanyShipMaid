@@ -1,4 +1,9 @@
 # Changes
+- V4.0.0
+	- Introduced configuration settings for randomizing both position and rotation on object cleanups (Thanks to [Jonteiro](https://github.com/Jonteiro))
+	- See configuration settings [ItemPlacementOverrideOffsetRotation] and [ItemPlacementOverrideOffsetPosition]
+	- WARNING: This will break compatibility between previous versions of the plugin. Make sure all players are upto date on the plugin to not have issues.
+
 - V3.2.7
 	- Made a guard for moving items that are inside of the LateGamesUpgrade wheelbarrow due to a reported game crash (Thanks to [GrantisMantis](https://github.com/GrantisMantis)) 
 	- Guarded the keybinds when the user is typing in chat (Thanks to [jcsnider](https://github.com/jcsnider))

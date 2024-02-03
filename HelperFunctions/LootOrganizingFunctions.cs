@@ -266,7 +266,7 @@ namespace ShipMaid.HelperFunctions
 							ShipMaid.LogError($"Got config value of {ItemPlacementRot}");
 							ShipMaid.LogError($"ItemPlacementOverrideOffsetPosition Enabled - Original {obj.name} rotation - where original rotation is {PositionHelperFunctions.DebugQuaterion(objectRotation)}");
 							System.Random r = new();
-							objectRotation *= Quaternion.Euler(0, ItemPlacementRot, 0);
+							objectRotation *= Quaternion.Euler(0, (float)r.NextDouble() * ItemPlacementRot, 0);
 							ShipMaid.LogError($"ItemPlacementOverrideOffsetPosition Enabled - Modified {obj.name} rotation - where modified rotation is {PositionHelperFunctions.DebugQuaterion(objectRotation)}");
 						}
 

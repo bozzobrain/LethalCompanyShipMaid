@@ -37,6 +37,7 @@ namespace ShipMaid.Networking
 				obj.gameObject.transform.SetPositionAndRotation(placementPosition, placementRotation);
 				obj.hasHitGround = false;
 				obj.startFallingPosition = placementPosition;
+				obj.floorYRot = -1;
 				//obj.itemProperties.restingRotation = placementRotation.eulerAngles;
 
 				if (obj.transform.parent != null)
@@ -44,6 +45,7 @@ namespace ShipMaid.Networking
 					obj.startFallingPosition = obj.transform.parent.InverseTransformPoint(obj.startFallingPosition);
 				}
 				obj.FallToGround(false);
+				obj.floorYRot = -1;
 			}
 
 			[ClientRpc]
