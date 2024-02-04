@@ -77,6 +77,12 @@ namespace ShipMaid
 			{
 				return;
 			}
+			if (!StartOfRound.Instance.shipHasLanded && !StartOfRound.Instance.inShipPhase)
+			{
+				ShipMaid.Log("Ship Has Not Landed and Not In Ship Phase, do not cleanup");
+
+				return;
+			}
 			ShipMaid.Log("Cleanup Closet");
 
 			LootOrganizingFunctions.OrganizeStorageCloset();
@@ -99,6 +105,12 @@ namespace ShipMaid
 			{
 				return;
 			}
+			if (!StartOfRound.Instance.shipHasLanded && !StartOfRound.Instance.inShipPhase)
+			{
+				ShipMaid.Log("Ship Has Not Landed and Not In Ship Phase, do not cleanup");
+				return;
+			}
+
 			ShipMaid.Log("Cleanup Ship");
 
 			LootOrganizingFunctions.OrganizeShipLoot();
