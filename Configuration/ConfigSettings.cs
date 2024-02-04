@@ -64,30 +64,6 @@ namespace ShipMaid.Configuration
 			SettingDescription = "Choose organization method, spread items of a type by [Value] or [Stack] perfectly by item type.",
 		};
 
-		public static ConfigSetupInputAction ShipMaidClosetCleanupInputAction = new ConfigSetupInputAction()
-		{
-			pluginName = "ShipMaid",
-			ActionName = "CleanupClosetKey",
-			KeyboardMapping = "<Keyboard>/n",
-			ActionDescription = "Activate ship maid closet keybind.",
-		};
-
-		public static ConfigSetupInputAction ShipMaidSetObjectTypePositionInputAction = new ConfigSetupInputAction()
-		{
-			pluginName = "ShipMaid",
-			ActionName = "SetObjectTypePositionKey",
-			KeyboardMapping = "<Keyboard>/j",
-			ActionDescription = "Set the position of this type of item (two handed / one handed / item type).",
-		};
-
-		public static ConfigSetupInputAction ShipMaidShipCleanupInputAction = new ConfigSetupInputAction()
-		{
-			pluginName = "ShipMaid",
-			ActionName = "CleanupShipKey",
-			KeyboardMapping = "<Keyboard>/m",
-			ActionDescription = "Activate ship maid ship keybind.",
-		};
-
 		public static ConfigSetupList SortingLocationBlacklist = new ConfigSetupList()
 		{
 			pluginName = "ShipMaid",
@@ -139,14 +115,11 @@ namespace ShipMaid.Configuration
 		public static void BindConfigSettings()
 		{
 			ShipMaid.Log("BindingConfigs");
-			currentConfigEntries = ShipMaidShipCleanupInputAction.Bind(currentConfigEntries);
-			currentConfigEntries = ShipMaidClosetCleanupInputAction.Bind(currentConfigEntries);
 			currentConfigEntries = OrganizationTechnique.Bind(currentConfigEntries);
 			currentConfigEntries = TwoHandedItemLocation.Bind(currentConfigEntries);
 			currentConfigEntries = ItemGrouping.Bind(currentConfigEntries);
 			currentConfigEntries = ClosetLocationOverride.Bind(currentConfigEntries);
 			currentConfigEntries = SortingLocationBlacklist.Bind(currentConfigEntries);
-			currentConfigEntries = ShipMaidSetObjectTypePositionInputAction.Bind(currentConfigEntries);
 			currentConfigEntries = UseItemTypePlacementOverrides.Bind(currentConfigEntries);
 			currentConfigEntries = ItemPlacementOverrideLocation.Bind(currentConfigEntries);
 			currentConfigEntries = UseOneHandedPlacementOverrides.Bind(currentConfigEntries);

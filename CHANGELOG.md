@@ -1,4 +1,7 @@
 # Changes
+- V4.0.1
+	- Keybinds are now handled by InputUtils and accessible in the settings menu in-game. (Thanks to [CatsArmy](https://github.com/CatsArmy))
+	- Now preventing the organization of items while the ship is moving (!shipHasLanded). Should allow organization while not on a ship (inShipPhase). (Thanks to [Jonteiro](https://github.com/Jonteiro))
 - V4.0.0
 	- Introduced configuration settings for randomizing both position and rotation on object cleanups (Thanks to [Jonteiro](https://github.com/Jonteiro))
 	- See configuration settings [ItemPlacementOverrideOffsetRotation] and [ItemPlacementOverrideOffsetPosition]

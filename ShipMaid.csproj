@@ -29,6 +29,9 @@
     <Reference Include="Facepunch.Steamworks.Win64">
       <HintPath>..\packages\Facepunch.Steamworks.Win64.dll</HintPath>
     </Reference>
+    <Reference Include="LethalCompanyInputUtils">
+      <HintPath>..\dependencies\LethalCompanyInputUtils.dll</HintPath>
+    </Reference>
     <Reference Include="Unity.Collections">
       <HintPath>..\packages\Unity.Collections.dll</HintPath>
     </Reference>

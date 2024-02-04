@@ -2,6 +2,7 @@
 using HarmonyLib;
 using ShipMaid.Configuration;
 using ShipMaid.HelperFunctions;
+using ShipMaid.InputUtils;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -15,28 +16,24 @@ namespace ShipMaid
 	{
 		public static PlayerControllerB localPlayerController;
 
-		private static InputAction shipMaidCleanupCloset;
-		private static InputAction shipMaidCleanupShip;
-		private static InputAction shipMaidDropAndSetObjectTypePosition;
-
 		[HarmonyPatch(typeof(PlayerControllerB), "OnDisable")]
 		[HarmonyPostfix]
 		public static void OnDisable(PlayerControllerB __instance)
 		{
-			if (shipMaidCleanupShip != null && !((Object)(object)__instance != (Object)(object)localPlayerController))
+			if (ShipMaid.InputActionsInstance.ShipCleanupKey != null && !((Object)(object)__instance != (Object)(object)localPlayerController))
 			{
-				shipMaidCleanupShip.performed -= OnShipMaidShipCleanupCalled;
-				shipMaidCleanupShip.Disable();
+				ShipMaid.InputActionsInstance.ShipCleanupKey.performed -= OnShipMaidShipCleanupCalled;
+				ShipMaid.InputActionsInstance.ShipCleanupKey.Disable();
 			}
-			if (shipMaidCleanupCloset != null && !((Object)(object)__instance != (Object)(object)localPlayerController))
+			if (ShipMaid.InputActionsInstance.StorageCleanupKey != null && !((Object)(object)__instance != (Object)(object)localPlayerController))
 			{
-				shipMaidCleanupCloset.performed -= OnShipMaidClosetCleanupCalled;
-				shipMaidCleanupCloset.Disable();
+				ShipMaid.InputActionsInstance.StorageCleanupKey.performed -= OnShipMaidClosetCleanupCalled;
+				ShipMaid.InputActionsInstance.StorageCleanupKey.Disable();
 			}
-			if (shipMaidDropAndSetObjectTypePosition != null && !((Object)(object)__instance != (Object)(object)localPlayerController))
+			if (ShipMaid.InputActionsInstance.LocationOverrideKey != null && !((Object)(object)__instance != (Object)(object)localPlayerController))
 			{
-				shipMaidDropAndSetObjectTypePosition.performed -= OnShipMaidDropAndSetObjectTypePositionCalled;
-				shipMaidDropAndSetObjectTypePosition.Disable();
+				ShipMaid.InputActionsInstance.LocationOverrideKey.performed -= OnShipMaidDropAndSetObjectTypePositionCalled;
+				ShipMaid.InputActionsInstance.LocationOverrideKey.Disable();
 			}
 		}
 
@@ -55,9 +52,6 @@ namespace ShipMaid
 		public static void OnLocalPlayerConnect(PlayerControllerB __instance)
 		{
 			localPlayerController = __instance;
-			shipMaidCleanupShip = new InputAction(null, 0, ConfigSettings.ShipMaidShipCleanupInputAction.Key.Value, "Press", null, null);
-			shipMaidCleanupCloset = new InputAction(null, 0, ConfigSettings.ShipMaidClosetCleanupInputAction.Key.Value, "Press", null, null);
-			shipMaidDropAndSetObjectTypePosition = new InputAction(null, 0, ConfigSettings.ShipMaidSetObjectTypePositionInputAction.Key.Value, "Press", null, null);
 			ShipMaidFunctions.initItemLocations();
 
 			if (localPlayerController.gameObject.activeSelf)
@@ -118,20 +112,20 @@ namespace ShipMaid
 
 		private static void SubscribeToEvents()
 		{
-			if (shipMaidCleanupShip != null)
+			if (ShipMaid.InputActionsInstance.ShipCleanupKey != null)
 			{
-				shipMaidCleanupShip.Enable();
-				shipMaidCleanupShip.performed += OnShipMaidShipCleanupCalled;
+				ShipMaid.InputActionsInstance.ShipCleanupKey.Enable();
+				ShipMaid.InputActionsInstance.ShipCleanupKey.performed += OnShipMaidShipCleanupCalled;
 			}
-			if (shipMaidCleanupCloset != null)
+			if (ShipMaid.InputActionsInstance.StorageCleanupKey != null)
 			{
-				shipMaidCleanupCloset.Enable();
-				shipMaidCleanupCloset.performed += OnShipMaidClosetCleanupCalled;
+				ShipMaid.InputActionsInstance.StorageCleanupKey.Enable();
+				ShipMaid.InputActionsInstance.StorageCleanupKey.performed += OnShipMaidClosetCleanupCalled;
 			}
-			if (shipMaidDropAndSetObjectTypePosition != null)
+			if (ShipMaid.InputActionsInstance.LocationOverrideKey != null)
 			{
-				shipMaidDropAndSetObjectTypePosition.Enable();
-				shipMaidDropAndSetObjectTypePosition.performed += OnShipMaidDropAndSetObjectTypePositionCalled;
+				ShipMaid.InputActionsInstance.LocationOverrideKey.Enable();
+				ShipMaid.InputActionsInstance.LocationOverrideKey.performed += OnShipMaidDropAndSetObjectTypePositionCalled;
 			}
 		}
 	}

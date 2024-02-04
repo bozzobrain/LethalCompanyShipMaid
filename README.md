@@ -10,6 +10,7 @@ A mod where the ship and the storage closet is cleaned up when you press the ass
 # Features
 ## Basics
 - Keypresses will organize each item type in groups by the name of the item
+	- Change these settings in the settings menu (InputUtils) 
 	- Ship cleanup default keybinding is 'M'
 		- By default all objects not on the 'ClosetLocationOverride' list are organized
 		- You can override specific items to not be sorted by adding them to the config setting 'SortingDisabledList'
@@ -37,15 +38,7 @@ A mod where the ship and the storage closet is cleaned up when you press the ass
 		- Items can be strewn accross the ship [Loose]-ly or [Tight]-ly packed on the wall opposite the default location of the Storage Closet (See config setting 'OrganizationTechniques')
 ## Config File Parameters
 - Keybinds
-	- CleanupShipKey
-		- Keypress used to cleanup the ship and closet
-
-	- CleanupClosetKey
-		- Keypress used to cleanup the closet only
-
-	- SetObjectTypePositionKey
-		- Keypress used to set an object's organization location
-
+	- Now handled in-game by using InputUtils
 - Ship Cleanup Configurations
 	- ItemGrouping
 		- Whether to group the items in tight clusters or to spread them out by value
@@ -132,6 +125,9 @@ A mod where the ship and the storage closet is cleaned up when you press the ass
 		- Format is:
 			- "###.#"
 # Changes
+- V4.0.1
+	- Keybinds are now handled by InputUtils and accessible in the settings menu in-game. (Thanks to [CatsArmy](https://github.com/CatsArmy))
+	- Now preventing the organization of items while the ship is moving (!shipHasLanded). Should allow organization while not on a ship (inShipPhase). (Thanks to [Jonteiro](https://github.com/Jonteiro))
 - V4.0.0
 	- Introduced configuration settings for randomizing both position and rotation on object cleanups (Thanks to [Jonteiro](https://github.com/Jonteiro))
 	- See configuration settings [ItemPlacementOverrideOffsetRotation] and [ItemPlacementOverrideOffsetPosition]

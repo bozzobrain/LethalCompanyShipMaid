@@ -1,18 +1,21 @@
 ﻿using BepInEx;
 using HarmonyLib;
 using ShipMaid.Configuration;
+using ShipMaid.InputUtils;
 using System.Reflection;
 
 namespace ShipMaid
 {
 	[BepInPlugin(GUID, NAME, VERSION)]
+	[BepInDependency("com.rune580.LethalCompanyInputUtils", BepInDependency.DependencyFlags.HardDependency)]
 	internal class ShipMaid : BaseUnityPlugin
 	{
 		public static ShipMaid instance;
 		public static ShipMaidFunctions smf = new();
+		internal static InputUtilsKeybinds InputActionsInstance = new InputUtilsKeybinds();
 		private const string GUID = "ShipMaid";
 		private const string NAME = "ShipMaid";
-		private const string VERSION = "4.0.0";
+		private const string VERSION = "4.0.1";
 
 		public static void Log(string message)
 		{
