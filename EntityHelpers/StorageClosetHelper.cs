@@ -10,11 +10,10 @@ namespace ShipMaid.EntityHelpers
 	{
 		public static Vector3 ClosetBoundsMax;
 		public static Vector3 ClosetBoundsMin;
-		private const float StorageLocationDoorOffsetToShelve = 0.2f;
+		private const float StorageLocationXOffsetToShelve = 0.2f;
+		private Vector3 ClosetRotation;
 		private string LastItemPlaced = string.Empty;
-		private Vector3 LeftDoor;
-		private float placementLocationX;
-		private Vector3 RightDoor;
+		private float placementLocationAcrossOffset = 0;
 		private int shelveToPlaceOn = 1;
 		private List<Vector3> ShevleListCenter = new List<Vector3>();
 		private GameObject StorageCloset;
@@ -22,33 +21,40 @@ namespace ShipMaid.EntityHelpers
 		private float StorageLocationXStart;
 		private float StorageLocationXStepItem = 0.2f;
 		private float StorageLocationXStepSize = 0.1f;
-		private float StorageLocationZOffset = 0.6f;
 
 		public StorageClosetHelper()
 		{
 			StorageCloset = GameObject.Find("/Environment/HangarShip/StorageCloset");
+			MeshCollider storageMeshCollider = StorageCloset.GetComponentInChildren<MeshCollider>();
 
-			// Cube.000 and Cube.002 are door entities - use location for bounding
-			var cube000 = StorageCloset.GetComponentsInChildren<Transform>().First(tf => tf.GetParent().name == "Cube.000").gameObject;
-			var cube002 = StorageCloset.GetComponentsInChildren<Transform>().First(tf => tf.GetParent().name == "Cube.002").gameObject;
+			ClosetRotation = StorageCloset.gameObject.transform.rotation.eulerAngles;
 
-			LeftDoor = cube000.transform.position;
-			RightDoor = cube002.transform.position;
+			StorageLocationXStart = storageMeshCollider.bounds.min.x + StorageLocationXOffsetToShelve;
+			StorageLocationXEnd = storageMeshCollider.bounds.max.x - StorageLocationXOffsetToShelve;
 
-			StorageLocationXStart = LeftDoor.x + StorageLocationDoorOffsetToShelve;
-			StorageLocationXEnd = RightDoor.x - StorageLocationDoorOffsetToShelve;
+			ShevleListCenter.Add(new(storageMeshCollider.bounds.center.x, 0.75f, storageMeshCollider.bounds.center.z));
+			ShevleListCenter.Add(new(storageMeshCollider.bounds.center.x, 1.4f, storageMeshCollider.bounds.center.z));
+			ShevleListCenter.Add(new(storageMeshCollider.bounds.center.x, 2f, storageMeshCollider.bounds.center.z));
+			ShevleListCenter.Add(new(storageMeshCollider.bounds.center.x, 2.5f, storageMeshCollider.bounds.center.z));
 
-			ShevleListCenter.Add(new((LeftDoor.x + RightDoor.x) / 2, 0.75f, LeftDoor.z));
-			ShevleListCenter.Add(new((LeftDoor.x + RightDoor.x) / 2, 1.4f, LeftDoor.z));
-			ShevleListCenter.Add(new((LeftDoor.x + RightDoor.x) / 2, 2f, LeftDoor.z));
-			ShevleListCenter.Add(new((LeftDoor.x + RightDoor.x) / 2, 2.5f, LeftDoor.z));
+			ClosetBoundsMin = new(storageMeshCollider.bounds.min.x + StorageLocationXOffsetToShelve, storageMeshCollider.bounds.min.y, storageMeshCollider.bounds.min.z);
+			ClosetBoundsMax = new(storageMeshCollider.bounds.max.x - StorageLocationXOffsetToShelve, storageMeshCollider.bounds.max.y, storageMeshCollider.bounds.max.z);
 
-			GameObject storageBounds = GameObject.Find("/Environment/HangarShip/StorageCloset");
-			MeshCollider bounds = storageBounds.GetComponentInChildren<MeshCollider>();
-			ClosetBoundsMin = new(bounds.bounds.min.x + 0.3f, bounds.bounds.min.y, bounds.bounds.min.z);
-			ClosetBoundsMax = new(bounds.bounds.max.x - 0.3f, bounds.bounds.max.y, bounds.bounds.max.z);
+			//ShipMaid.LogError($"Rotation of storage - {PositionHelperFunctions.DebugVector3(ClosetRotation)}");
+			//ShipMaid.LogError($"Collider min - {PositionHelperFunctions.DebugVector3(storageMeshCollider.bounds.min)}");
+			//ShipMaid.LogError($"Collider max - {PositionHelperFunctions.DebugVector3(storageMeshCollider.bounds.max)}");
+			//ShipMaid.LogError($"Width of storage - {storageMeshCollider.bounds.max.x - storageMeshCollider.bounds.min.x}");
+			//ShipMaid.LogError($"Depth of storage - {storageMeshCollider.bounds.max.z - storageMeshCollider.bounds.min.z}");
+			//ShipMaid.LogError($"Center of storage x - {PositionHelperFunctions.DebugVector3(storageMeshCollider.bounds.center)}");
+		}
 
-			placementLocationX = StorageLocationXStart;
+		/// <summary>
+		/// Get a string of the ship bounds min to ship bounds max.
+		/// </summary>
+		/// <returns>string of x,y,z to x,y,z [min to max].</returns>
+		public static string GetDebugLocationCloset()
+		{
+			return $"{ClosetBoundsMin.x},{ClosetBoundsMin.y},{ClosetBoundsMin.z} to {ClosetBoundsMax.x},{ClosetBoundsMax.y},{ClosetBoundsMax.z}";
 		}
 
 		/// <summary>
@@ -98,17 +104,17 @@ namespace ShipMaid.EntityHelpers
 			if (objectsOfType.First().name != LastItemPlaced && LastItemPlaced != string.Empty)
 			{
 				// if the all objects will not fit on this shelve
-				if (placementLocationX + StorageLocationXStepItem + StorageLocationXStepSize * objectsOfType.Count > StorageLocationXEnd)
+				if (placementLocationAcrossOffset + StorageLocationXStart + StorageLocationXStepItem + StorageLocationXStepSize * objectsOfType.Count > StorageLocationXEnd)
 				{
 					// Start on a new shelve
-					placementLocationX = StorageLocationXStart;
+					placementLocationAcrossOffset = 0;
 					if (shelveToPlaceOn < 4)
 						shelveToPlaceOn++;
 				}
 				else
 				{
 					// Otherwise adjust for the spacing between new items
-					placementLocationX += StorageLocationXStepItem;
+					placementLocationAcrossOffset += StorageLocationXStepItem;
 				}
 
 				LastItemPlaced = objectsOfType.First().name;
@@ -153,17 +159,24 @@ namespace ShipMaid.EntityHelpers
 					forwardBackwardOffset -= forwardBackwardStepSize;
 				}
 
-				Vector3 placementLocation = new(placementLocationX, ShevleListCenter[shelveToPlaceOn - 1].y, ShevleListCenter[shelveToPlaceOn - 1].z + StorageLocationZOffset + forwardBackwardOffset);// Check for and fix x locations out of bounds
+				// Handle a rotated storage closet
+				Vector3 itemOffsetOriginal = new(placementLocationAcrossOffset, 0, forwardBackwardOffset);
+				Vector3 itemOffsetModified = new(itemOffsetOriginal.x * Mathf.Cos(ClosetRotation.y * Mathf.Deg2Rad) + itemOffsetOriginal.z * Mathf.Sin(ClosetRotation.y * Mathf.Deg2Rad), 0, itemOffsetOriginal.z * (Mathf.Cos(ClosetRotation.y * Mathf.Deg2Rad)) + itemOffsetOriginal.x * (Mathf.Sin(ClosetRotation.y * Mathf.Deg2Rad)));
+				//ShipMaid.LogError($"Original offset - {PositionHelperFunctions.DebugVector3(itemOffsetOriginal)}");
+				//ShipMaid.LogError($"Modified offset - {PositionHelperFunctions.DebugVector3(itemOffsetModified)}");
+
+				Vector3 placementLocation = new(StorageLocationXStart + itemOffsetModified.x, ShevleListCenter[shelveToPlaceOn - 1].y, ShevleListCenter[shelveToPlaceOn - 1].z + +itemOffsetModified.z);
+
 				if (!IsPositionWithinCloset(placementLocation))
 				{
+					ShipMaid.Log($"Fixed object location out of closet {obj.name} - Original Location {PositionHelperFunctions.DebugVector3(placementLocation)} -  Bounds are {GetDebugLocationCloset()}");
 					placementLocation = PositionHelperFunctions.AdjustPositionWithinBounds(placementLocation, ClosetBoundsMin, ClosetBoundsMax);
-					ShipMaid.Log($"Fixed object location out of closet {obj.name}");
 				}
-				ShipMaid.Log($"Placing {obj.name} [{i + 1} of {objectsOfType.Count}] on shelve {shelveToPlaceOn} at {placementLocation.x},{placementLocation.y},{placementLocation.z}");
+				ShipMaid.Log($"Placing {obj.name} [{i + 1} of {objectsOfType.Count}] on shelve {shelveToPlaceOn} at {PositionHelperFunctions.DebugVector3(placementLocation)}");
 
 				NetworkingObjectManager.RunClientRpc(obj.NetworkObject, placementLocation, obj.transform.rotation, false);
 
-				placementLocationX += StorageLocationXStepSize;
+				placementLocationAcrossOffset += StorageLocationXStepSize;
 			}
 			// Return shelve iterator to default setting
 			switch (LastItemPlaced)

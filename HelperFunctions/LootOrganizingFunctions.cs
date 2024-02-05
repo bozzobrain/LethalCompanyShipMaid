@@ -52,6 +52,7 @@ namespace ShipMaid.HelperFunctions
 			}
 			OrganizeItems(sch, oneHandedObjects, false);
 			OrganizeItems(sch, twoHandedObjects, true);
+			OrganizeStorageCloset();
 		}
 
 		/// <summary>
@@ -263,11 +264,11 @@ namespace ShipMaid.HelperFunctions
 						Quaternion objectRotation = new(obj.NetworkObject.transform.rotation.x, obj.NetworkObject.transform.rotation.y, obj.NetworkObject.transform.rotation.z, obj.NetworkObject.transform.rotation.w);
 						if (ConfigSettings.ItemPlacementOverrideOffsetRotation.GetFloat(ConfigSettings.ItemPlacementOverrideOffsetRotation.Key.Value, out float ItemPlacementRot) && (ConfigSettings.UseOneHandedPlacementOverrides.Key.Value == "Enabled" || ConfigSettings.UseTwoHandedPlacementOverrides.Key.Value == "Enabled") || ConfigSettings.UseItemTypePlacementOverrides.Key.Value == "Enabled")
 						{
-							ShipMaid.LogError($"Got config value of {ItemPlacementRot}");
-							ShipMaid.LogError($"ItemPlacementOverrideOffsetPosition Enabled - Original {obj.name} rotation - where original rotation is {PositionHelperFunctions.DebugQuaterion(objectRotation)}");
+							//ShipMaid.LogError($"Got config value of {ItemPlacementRot}");
+							//ShipMaid.LogError($"ItemPlacementOverrideOffsetPosition Enabled - Original {obj.name} rotation - where original rotation is {PositionHelperFunctions.DebugQuaterion(objectRotation)}");
 							System.Random r = new();
 							objectRotation *= Quaternion.Euler(0, (float)r.NextDouble() * ItemPlacementRot, 0);
-							ShipMaid.LogError($"ItemPlacementOverrideOffsetPosition Enabled - Modified {obj.name} rotation - where modified rotation is {PositionHelperFunctions.DebugQuaterion(objectRotation)}");
+							//ShipMaid.LogError($"ItemPlacementOverrideOffsetPosition Enabled - Modified {obj.name} rotation - where modified rotation is {PositionHelperFunctions.DebugQuaterion(objectRotation)}");
 						}
 
 						// Make sure object is within ship (fix if outside boundaries)
@@ -293,8 +294,6 @@ namespace ShipMaid.HelperFunctions
 					itemCounter++;
 				}
 			}
-			// TODO - This seems like a hacky approach (double movement)
-			OrganizeStorageCloset();
 		}
 	}
 }

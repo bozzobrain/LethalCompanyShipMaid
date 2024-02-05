@@ -1,4 +1,7 @@
 # Changes
+- V4.0.2
+	- Updates to closet location calculation. No longer using door locations for bounds, which should result more consistent organization.  (Thanks to [UmaLPZ](https://github.com/UmaLPZ))
+	- Improving handling of a rotated storage closet to position items more intelligently in this case.
 - V4.0.1
 	- Keybinds are now handled by InputUtils and accessible in the settings menu in-game. (Thanks to [CatsArmy](https://github.com/CatsArmy))
 	- Now preventing the organization of items while the ship is moving (!shipHasLanded). Should allow organization while not on a ship (inShipPhase). (Thanks to [Jonteiro](https://github.com/Jonteiro))
