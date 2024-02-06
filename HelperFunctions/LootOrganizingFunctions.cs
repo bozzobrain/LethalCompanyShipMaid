@@ -52,7 +52,6 @@ namespace ShipMaid.HelperFunctions
 			}
 			OrganizeItems(sch, oneHandedObjects, false);
 			OrganizeItems(sch, twoHandedObjects, true);
-			OrganizeStorageCloset();
 		}
 
 		/// <summary>
