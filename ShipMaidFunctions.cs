@@ -15,6 +15,7 @@ namespace ShipMaid
 	internal class ShipMaidFunctions
 	{
 		public static List<GrabbableObjectPositionHelper> GrabbablesPositions = new();
+		public static List<GrabbableObjectPositionHelperShotgun> GrabbablesPositionsShotgun = new();
 		public static Vector3 OneHandedPosition = new(UnsetPosition.x, UnsetPosition.y, UnsetPosition.z);
 		public static Vector3 TwoHandedPosition = new(UnsetPosition.x, UnsetPosition.y, UnsetPosition.z);
 		public static Vector3 UnsetPosition = new(-9f, -9f, -9f);
@@ -26,6 +27,21 @@ namespace ShipMaid
 			if (obj != null)
 			{
 				Vector3 goPos = obj.gameObject.transform.position;
+				if (obj is ShotgunItem shotgun && GrabbablesPositionsShotgun.Where(o => o.objName == obj.name && shotgun.shellsLoaded == o.AmmoQuantity).Any())
+				{
+					GrabbablesPositionsShotgun.Where(o => o.objName == shotgun.name && shotgun.shellsLoaded == o.AmmoQuantity).First().PlacementPosition = new(goPos.x, goPos.y, goPos.z);
+					GrabbableObjectPositionHelperShotgun goph_shotgun = new(obj.name, goPos, shotgun.shellsLoaded);
+					ConfigSettings.ShotgunPlacementOverrideLocation.AddOrUpdateObjectPositionSetting(goph_shotgun);
+					ShipMaid.instance.Config.Save();
+				}
+				else if (obj is ShotgunItem shotgun1)
+				{
+					GrabbablesPositionsShotgun.Add(new(obj.name, goPos, shotgun1.shellsLoaded));
+					GrabbableObjectPositionHelperShotgun goph_shotgun = new(obj.name, goPos, shotgun1.shellsLoaded);
+					ConfigSettings.ShotgunPlacementOverrideLocation.AddOrUpdateObjectPositionSetting(goph_shotgun);
+					ShipMaid.instance.Config.Save();
+				}
+
 				if (GrabbablesPositions.Where(o => o.objName == obj.name).Any())
 				{
 					GrabbablesPositions.Where(o => o.objName == obj.name).First().PlacementPosition = new(goPos.x, goPos.y, goPos.z);
@@ -86,6 +102,16 @@ namespace ShipMaid
 			if (GrabbablesPositions.Where(o => o.objName == obj.name).Any())
 			{
 				return GrabbablesPositions.Where(o => o.objName == obj.name).First();
+			}
+
+			return null;
+		}
+
+		internal static GrabbableObjectPositionHelperShotgun GetObjectPositionTargetShotgun(ShotgunItem obj)
+		{
+			if (GrabbablesPositionsShotgun.Where(o => o.objName == obj.name && obj.shellsLoaded == o.AmmoQuantity).Any())
+			{
+				return GrabbablesPositionsShotgun.Where(o => o.objName == obj.name && obj.shellsLoaded == o.AmmoQuantity).First();
 			}
 
 			return null;

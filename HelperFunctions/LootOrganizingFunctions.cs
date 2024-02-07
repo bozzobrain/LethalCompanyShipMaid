@@ -185,6 +185,8 @@ namespace ShipMaid.HelperFunctions
 						if (ConfigSettings.ItemGrouping.Key.Value == "Loose") xPositionOffset *= 2.0f;
 					}
 					Vector3 placementPosition;
+
+					// Handle all object override locations
 					if (ShipMaidFunctions.GetObjectPositionTarget(firstObjectOfType) is GrabbableObjectPositionHelper goph && goph != null && ConfigSettings.UseItemTypePlacementOverrides.Key.Value == "Enabled")
 					{
 						ShipMaid.Log($"Setting position from memory for {firstObjectOfType.name}");
@@ -227,6 +229,15 @@ namespace ShipMaid.HelperFunctions
 							ShipMaid.Log($"Ignoring {obj.name} that appears to be located in a Wheelbarrow/Shopping Cart");
 							continue;
 						}
+
+						// Override placement if object is shotgun and shotgun override is enabled
+						if (firstObjectOfType is ShotgunItem shotgun && ShipMaidFunctions.GetObjectPositionTargetShotgun(shotgun) is GrabbableObjectPositionHelperShotgun goph_shotgun && goph_shotgun != null && ConfigSettings.OrganizeShotgunByAmmo.Key.Value == "Enabled")
+						{
+							int ammoCapacityShotgun = shotgun.shellsLoaded;
+							ShipMaid.Log($"Setting position from memory for {firstObjectOfType.name} - Ammo capacity {ammoCapacityShotgun}");
+							placementPosition = goph_shotgun.PlacementPosition;
+						}
+
 						// Choose how to organze each item of loot
 						if (ConfigSettings.OrganizationTechnique.Key.Value == "Value" && ConfigSettings.UseItemTypePlacementOverrides.Key.Value != "Enabled" && ConfigSettings.UseOneHandedPlacementOverrides.Key.Value != "Enabled" && ConfigSettings.UseTwoHandedPlacementOverrides.Key.Value != "Enabled")
 						{

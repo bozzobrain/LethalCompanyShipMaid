@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace ShipMaid.Configuration
 {
-	public class ConfigSetupShotgunPositions
+	public class ConfigSetupGrabbableObjectPositions
 	{
 		public ConfigEntry<string> Key;
 
@@ -22,27 +22,27 @@ namespace ShipMaid.Configuration
 
 		public string SettingValue;
 
-		public ConfigSetupShotgunPositions()
+		public ConfigSetupGrabbableObjectPositions()
 		{
 		}
 
-		public static ConfigEntry<string> CreateKey(ConfigSetupShotgunPositions c)
+		public static ConfigEntry<string> CreateKey(ConfigSetupGrabbableObjectPositions c)
 		{
 			return ShipMaid.instance.Config.Bind(c.pluginName, c.SettingName, c.SettingValue, c.SettingDescription);
 		}
 
-		public void AddOrUpdateObjectPositionSetting(GrabbableObjectPositionHelperShotgun shotgunPositionHelper)
+		public void AddOrUpdateObjectPositionSetting(GrabbableObjectPositionHelper objectPositionHelper)
 		{
-			List<GrabbableObjectPositionHelperShotgun> newSetting = new();
+			List<GrabbableObjectPositionHelper> newSetting = new();
 			string newSettingValue = string.Empty;
 			var objList = GetObjectPositionList(this.Key.Value);
 			// If this object already exists in list
-			if (objList.Where(o => o.objName == shotgunPositionHelper.objName && shotgunPositionHelper.AmmoQuantity == o.AmmoQuantity).Any())
+			if (objList.Where(o => o.objName == objectPositionHelper.objName).Any())
 			{
 				// Remove the old
-				objList.Remove(objList.Where(o => o.objName == shotgunPositionHelper.objName && shotgunPositionHelper.AmmoQuantity == o.AmmoQuantity).FirstOrDefault());
+				objList.Remove(objList.Where(o => o.objName == objectPositionHelper.objName).FirstOrDefault());
 				// Add the new
-				objList.Add(shotgunPositionHelper);
+				objList.Add(objectPositionHelper);
 			}
 			// This means that there is the dummy setting in the list
 			else if (objList.Where(o => o.objName == "name").Any())
@@ -50,17 +50,17 @@ namespace ShipMaid.Configuration
 				// Remove the dummy
 				objList.Remove(objList.Where(o => o.objName == "name").FirstOrDefault());
 				// Add the new
-				objList.Add(shotgunPositionHelper);
+				objList.Add(objectPositionHelper);
 			}
 			// This means that there are entries in the list and the new entry is not listed
 			else
 			{
 				// Add the new
-				objList.Add(shotgunPositionHelper);
+				objList.Add(objectPositionHelper);
 			}
 			for (int i = 0; i < objList.Count; i++)
 			{
-				GrabbableObjectPositionHelperShotgun obj = objList[i];
+				GrabbableObjectPositionHelper obj = objList[i];
 				newSettingValue += MakeObjectSettingString(obj);
 				if (i < objList.Count - 1)
 				{
@@ -80,11 +80,11 @@ namespace ShipMaid.Configuration
 			return toDictionary;
 		}
 
-		public List<GrabbableObjectPositionHelperShotgun> GetObjectPositionList(string configSetting)
+		public List<GrabbableObjectPositionHelper> GetObjectPositionList(string configSetting)
 		{
-			List<GrabbableObjectPositionHelperShotgun> resultPositions = new();
+			List<GrabbableObjectPositionHelper> resultPositions = new();
 
-			Regex ItemMatches = new Regex(@"((?<name>[A-Za-z\d\(\)]+)[,](?<posx>[-]*[\d]+[.][\d]+)[,](?<posy>[-]*[\d]+[.][\d]+)[,](?<posz>[-]*[\d]+[.][\d]+)[,]*)[,](?<ammo>[\d])");
+			Regex ItemMatches = new Regex(@"((?<name>[A-Za-z\d\(\)]+)[,](?<posx>[-]*[\d]+[.][\d]+)[,](?<posy>[-]*[\d]+[.][\d]+)[,](?<posz>[-]*[\d]+[.][\d]+)[,]*)");
 			var result = ItemMatches.Matches(configSetting);
 			foreach (Match ItemMatch in result)
 			{
@@ -92,10 +92,9 @@ namespace ShipMaid.Configuration
 				string S_x = ItemMatch.Groups["posx"].ToString();
 				string S_y = ItemMatch.Groups["posy"].ToString();
 				string S_z = ItemMatch.Groups["posz"].ToString();
-				string ammo = ItemMatch.Groups["ammo"].ToString();
-				if (float.TryParse(S_x, out float x) && float.TryParse(S_y, out float y) && float.TryParse(S_z, out float z) && int.TryParse(ammo, out int ammoQuantity))
+				if (float.TryParse(S_x, out float x) && float.TryParse(S_y, out float y) && float.TryParse(S_z, out float z))
 				{
-					GrabbableObjectPositionHelperShotgun goph = new(name, x, y, z, ammoQuantity);
+					GrabbableObjectPositionHelper goph = new(name, x, y, z);
 					resultPositions.Add(goph);
 					//ShipMaid.Log($"Parsed config setting GrabbleObjectPositionHelper {goph.objName},{goph.PlacementPosition.x},{goph.PlacementPosition.y},{goph.PlacementPosition.z}");
 				}
@@ -104,9 +103,9 @@ namespace ShipMaid.Configuration
 			return resultPositions;
 		}
 
-		public string MakeObjectSettingString(GrabbableObjectPositionHelperShotgun goph)
+		public string MakeObjectSettingString(GrabbableObjectPositionHelper goph)
 		{
-			return goph.objName + "," + goph.PlacementPosition.x + "," + goph.PlacementPosition.y + "," + goph.PlacementPosition.z + "," + goph.AmmoQuantity;
+			return goph.objName + "," + goph.PlacementPosition.x + "," + goph.PlacementPosition.y + "," + goph.PlacementPosition.z;
 		}
 	}
 }

@@ -64,6 +64,22 @@ namespace ShipMaid.Configuration
 			SettingDescription = "Choose organization method, spread items of a type by [Value] or [Stack] perfectly by item type.",
 		};
 
+		public static ConfigSetupString OrganizeShotgunByAmmo = new ConfigSetupString()
+		{
+			pluginName = "ShipMaid",
+			SettingName = "OrganizeShotgunByAmmo",
+			SettingValue = "Disabled",
+			SettingDescription = "If [Enabled], setting position overrides on shotguns will permit them to be organized by how much ammo is loaded",
+		};
+
+		public static ConfigSetupShotgunPositions ShotgunPlacementOverrideLocation = new()
+		{
+			pluginName = "ShipMaid",
+			SettingName = "ShotgunPlacementOverrideLocation",
+			SettingValue = "name,0.00,0.00,0.00,0",
+			SettingDescription = "Name,locationX,locationY,locationZ,shellCount of the shotgun (if OrganizeShotgunByAmmo is enabled)",
+		};
+
 		public static ConfigSetupList SortingLocationBlacklist = new ConfigSetupList()
 		{
 			pluginName = "ShipMaid",
@@ -128,6 +144,7 @@ namespace ShipMaid.Configuration
 			currentConfigEntries = TwoHandedItemPlacementOverrideLocation.Bind(currentConfigEntries);
 			currentConfigEntries = ItemPlacementOverrideOffsetPosition.Bind(currentConfigEntries);
 			currentConfigEntries = ItemPlacementOverrideOffsetRotation.Bind(currentConfigEntries);
+			currentConfigEntries = OrganizeShotgunByAmmo.Bind(currentConfigEntries);
 
 			TryRemoveOldConfigSettings();
 		}
