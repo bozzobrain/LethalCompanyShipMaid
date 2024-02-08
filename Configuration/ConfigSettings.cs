@@ -145,6 +145,7 @@ namespace ShipMaid.Configuration
 			currentConfigEntries = ItemPlacementOverrideOffsetPosition.Bind(currentConfigEntries);
 			currentConfigEntries = ItemPlacementOverrideOffsetRotation.Bind(currentConfigEntries);
 			currentConfigEntries = OrganizeShotgunByAmmo.Bind(currentConfigEntries);
+			currentConfigEntries = ShotgunPlacementOverrideLocation.Bind(currentConfigEntries);
 
 			TryRemoveOldConfigSettings();
 		}

@@ -1,4 +1,7 @@
 # Changes
+- V4.0.3
+	- Added shotgun organization by ammo capacity. (Thanks to [jcsnider](https://github.com/jcsnider) for the suggestion)
+	- See new configuration options [OrganizeShotgunByAmmo] and [ShotgunPlacementOverrideLocation]
 - V4.0.2
 	- Updates to closet location calculation. No longer using door locations for bounds, which should result more consistent organization.  (Thanks to [UmaLPZ](https://github.com/UmaLPZ))
 	- Improving handling of a rotated storage closet to position items more intelligently in this case.

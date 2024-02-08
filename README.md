@@ -119,12 +119,26 @@ A mod where the ship and the storage closet is cleaned up when you press the ass
 		- Each object has the ability to be offset from the 'Center' location by the some fractional amount in the config setting
 		- Format is:
 			- "posx,posy,posz"
+		
 	- ItemPlacementOverrideOffsetRotation
 		- Randomizes the placement rotation of items so that they do not stack directly on top of each other
 		- Each object has the ability to be rotated from the by the some fractional amount in the config setting
 		- Format is:
 			- "###.#"
+- Shotgun Position Override
+	- OrganizeShotgunByAmmo
+		- When [Enabled] and you have pressed 'J' with a shotgun of a given ammo count in a given location, all future cleanup commands will place this item type in its given location (stored in config file)
+		- You can set a location for shotguns with 0 shells loaded, 1 shell and 2 and they will be organized in a pile with other shotguns of the same ammo
+
+	- ShotgunPlacementOverrideLocation
+		- The position in the ship where Shotguns of the ammo count will be placed if override is enabled
+		- Configuration will be automatically updated when the keybind is pressed in game
+		- Format is:
+			- "Shotgun(clone),posx,posy,posz,ammo_count"
 # Changes
+- V4.0.3
+	- Added shotgun organization by ammo capacity. (Thanks to [jcsnider](https://github.com/jcsnider) for the suggestion)
+	- See new configuration options [OrganizeShotgunByAmmo] and [ShotgunPlacementOverrideLocation]
 - V4.0.2
 	- Updates to closet location calculation. No longer using door locations for bounds, which should result more consistent organization.  (Thanks to [UmaLPZ](https://github.com/UmaLPZ))
 	- Improving handling of a rotated storage closet to position items more intelligently in this case.

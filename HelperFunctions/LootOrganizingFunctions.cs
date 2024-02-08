@@ -229,9 +229,16 @@ namespace ShipMaid.HelperFunctions
 							ShipMaid.Log($"Ignoring {obj.name} that appears to be located in a Wheelbarrow/Shopping Cart");
 							continue;
 						}
-
+						if (firstObjectOfType is ShotgunItem shotgun1)
+						{
+							ShipMaid.LogError($"Item is Shotgun - {shotgun1.name}");
+						}
+						if (firstObjectOfType is ShotgunItem shotgun2 && ShipMaidFunctions.GetObjectPositionTargetShotgun(shotgun2) is GrabbableObjectPositionHelperShotgun goph_shotgun1 && goph_shotgun1 != null)
+						{
+							ShipMaid.LogError("Item is Shotgun and target retrieved");
+						}
 						// Override placement if object is shotgun and shotgun override is enabled
-						if (firstObjectOfType is ShotgunItem shotgun && ShipMaidFunctions.GetObjectPositionTargetShotgun(shotgun) is GrabbableObjectPositionHelperShotgun goph_shotgun && goph_shotgun != null && ConfigSettings.OrganizeShotgunByAmmo.Key.Value == "Enabled")
+						if (obj is ShotgunItem shotgun && ShipMaidFunctions.GetObjectPositionTargetShotgun(shotgun) is GrabbableObjectPositionHelperShotgun goph_shotgun && goph_shotgun != null && ConfigSettings.OrganizeShotgunByAmmo.Key.Value == "Enabled")
 						{
 							int ammoCapacityShotgun = shotgun.shellsLoaded;
 							ShipMaid.Log($"Setting position from memory for {firstObjectOfType.name} - Ammo capacity {ammoCapacityShotgun}");

@@ -142,6 +142,41 @@ namespace ShipMaid
 			List<string> ItemsForStorageCloset = ConfigSettings.ClosetLocationOverride.GetStrings(ConfigSettings.ClosetLocationOverride.Key.Value);
 			HangarShipHelper hsh = new();
 			var allItems = hsh.FindAllScrapShip();
+			if (ConfigSettings.OrganizeShotgunByAmmo.Key.Value == "Enabled")
+			{
+				//ShipMaid.Log("Shotgun Override - Enabled");
+				var shotgunPlacementListConfig = ConfigSettings.ShotgunPlacementOverrideLocation.GetObjectPositionList(ConfigSettings.ShotgunPlacementOverrideLocation.Key.Value);
+
+				if (shotgunPlacementListConfig.Count > 0 && shotgunPlacementListConfig.First().objName != "name")
+				{
+					//ShipMaid.Log("Shotgun Override - Got Valid List");
+					foreach (var itemPlacement in shotgunPlacementListConfig)
+					{
+						//ShipMaid.Log($"Shotgun Override Config Found for quantity - {itemPlacement.AmmoQuantity}");
+						GrabbablesPositionsShotgun.Add(itemPlacement);
+					}
+				}
+				else
+				{
+					foreach (var obj in allItems)
+					{
+						if (obj is ShotgunItem shotgun)
+						{
+							if (ItemsForStorageCloset.Where(ifsc => ifsc.Equals(obj.name)).Any())
+								continue;
+							if (GrabbablesPositionsShotgun.Where(o => o.objName == shotgun.name && o.AmmoQuantity == shotgun.shellsLoaded).Any())
+							{
+								GrabbablesPositionsShotgun.Where(o => o.objName == obj.name && o.AmmoQuantity == shotgun.shellsLoaded).First().PlacementPosition = obj.gameObject.transform.position;
+							}
+							else
+							{
+								GrabbablesPositionsShotgun.Add(new(obj.name, obj.gameObject.transform.position, shotgun.shellsLoaded));
+							}
+						}
+					}
+				}
+			}
+
 			if (ConfigSettings.UseItemTypePlacementOverrides.Key.Value == "Enabled")
 			{
 				var itemPlacementListConfig = ConfigSettings.ItemPlacementOverrideLocation.GetObjectPositionList(ConfigSettings.ItemPlacementOverrideLocation.Key.Value);

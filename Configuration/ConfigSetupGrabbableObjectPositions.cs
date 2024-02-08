@@ -93,11 +93,13 @@ namespace ShipMaid.Configuration
 				string S_y = ItemMatch.Groups["posy"].ToString();
 				string S_z = ItemMatch.Groups["posz"].ToString();
 				string ammo = ItemMatch.Groups["ammo"].ToString();
+				ShipMaid.LogError($"Parsed config setting GrabbableObjectPositionHelperShotgun {name},{S_x},{S_y},{S_z},{ammo}");
+
 				if (float.TryParse(S_x, out float x) && float.TryParse(S_y, out float y) && float.TryParse(S_z, out float z) && int.TryParse(ammo, out int ammoQuantity))
 				{
 					GrabbableObjectPositionHelperShotgun goph = new(name, x, y, z, ammoQuantity);
 					resultPositions.Add(goph);
-					//ShipMaid.Log($"Parsed config setting GrabbleObjectPositionHelper {goph.objName},{goph.PlacementPosition.x},{goph.PlacementPosition.y},{goph.PlacementPosition.z}");
+					ShipMaid.LogError($"Parsed config setting GrabbableObjectPositionHelperShotgun {goph.objName},{goph.PlacementPosition.x},{goph.PlacementPosition.y},{goph.PlacementPosition.z},{goph.AmmoQuantity}");
 				}
 			}
 
