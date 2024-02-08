@@ -36,6 +36,9 @@ A mod where the ship and the storage closet is cleaned up when you press the ass
 		- Items now are organized by [Value] by default, the futher from the door, the higher the value. Can also be [Stack]-ed to place all objects of a type directly ontop of each other (See config setting 'ItemGrouping')
 		- Items are grouped in two locations, front of ship and back of ship (See config setting 'TwoHandedItemLocation')
 		- Items can be strewn accross the ship [Loose]-ly or [Tight]-ly packed on the wall opposite the default location of the Storage Closet (See config setting 'OrganizationTechniques')
+- Shotgun Organization
+	- Shotguns can be organized into stacks by the amount of shells that are loaded into them using 'OrganizeShotgunByAmmo' config option.
+	- Position is set either manually by the config file or by pressing J or whatever keybind you have set by 'SetObjectTypePositionKey'
 ## Config File Parameters
 - Keybinds
 	- Now handled in-game by using InputUtils
