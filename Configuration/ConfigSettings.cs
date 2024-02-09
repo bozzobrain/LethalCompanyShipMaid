@@ -120,6 +120,14 @@ namespace ShipMaid.Configuration
 			SettingDescription = "If [Enabled], pressing J (or what ever keybind from SetObjectTypePositionKey) with a one handed object will set all one handed objects location for organization",
 		};
 
+		public static ConfigSetupString UseOnlyTerminal = new ConfigSetupString()
+		{
+			pluginName = "ShipMaid",
+			SettingName = "UseOnlyTerminal",
+			SettingValue = "Disabled",
+			SettingDescription = "If [Enabled], the keybinding will be disabled and only the terminal will be used for cleanup commands",
+		};
+
 		public static ConfigSetupString UseTwoHandedPlacementOverrides = new ConfigSetupString()
 		{
 			pluginName = "ShipMaid",
@@ -131,6 +139,7 @@ namespace ShipMaid.Configuration
 		public static void BindConfigSettings()
 		{
 			ShipMaid.Log("BindingConfigs");
+			currentConfigEntries = UseOnlyTerminal.Bind(currentConfigEntries);
 			currentConfigEntries = OrganizationTechnique.Bind(currentConfigEntries);
 			currentConfigEntries = TwoHandedItemLocation.Bind(currentConfigEntries);
 			currentConfigEntries = ItemGrouping.Bind(currentConfigEntries);

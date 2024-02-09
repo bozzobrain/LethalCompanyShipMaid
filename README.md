@@ -1,22 +1,31 @@
 # LethalCompanyShipMaid
-A mod where the ship and the storage closet is cleaned up when you press the associated keybinding within the ship.
+A mod where the ship and the storage closet is cleaned up when you press the associated keybinding within the ship or use the terminal command.
 
 # Usage
-- Press 'M' to cleanup the ship and closet
-- Press 'N' to cleanup the storage closet only
+- Activate the cleanup methods by using the terminal or keypresses
+	- Terminal Commands 	
+		- Type 'cleanup' to cleanup the ship and closet
+		- Type 'cleanup storage' to cleanup the storage closet only
+	- Keybinds
+		- Press 'M' to cleanup the ship and closet
+		- Press 'N' to cleanup the storage closet only
 - Press 'J' to set an objects placement location (if position overrides enabled)
 - Make sure that any players that you play with also have the mod installed for them to see the organized loot change positions.
 
 # Features
 ## Basics
-- Keypresses will organize each item type in groups by the name of the item
-	- Change these settings in the settings menu (InputUtils) 
-	- Ship cleanup default keybinding is 'M'
-		- By default all objects not on the 'ClosetLocationOverride' list are organized
-		- You can override specific items to not be sorted by adding them to the config setting 'SortingDisabledList'
-	- Closet cleanup default keybinding is 'N'
-		- Items in the closet will be staggered slightly to the right of the 'first' item
-		- Can override which objects get automatically placed in the storage closet using Config setting 'ClosetLocationOverride'
+ - Either Keypresses or Terminal can activate the cleanup routines
+	- Key Binds
+		- Change these settings in the settings menu (InputUtils) 
+		- Ship cleanup default keybinding is 'M'
+			- By default all objects not on the 'ClosetLocationOverride' list are organized
+			- You can override specific items to not be sorted by adding them to the config setting 'SortingDisabledList'
+		- Closet cleanup default keybinding is 'N'
+			- Items in the closet will be staggered slightly to the right of the 'first' item
+			- Can override which objects get automatically placed in the storage closet using Config setting 'ClosetLocationOverride'
+	- Terminal Interface
+		- Going to the terminal and entering either 'cleanup' or 'cleanup storage' will organize the ship or the storage closet.
+- Setting object locations
 	- Set object location default keybinding is 'J'
 		- If UseOneHandedPlacementOverrides / UseTwoHandedPlacementOverrides / UseItemTypePlacementOverrides is enabled, pressing this keybind will log the location of the given item for future organization requests
 		- Object override locations are stored in the config file and will persist into other game files
@@ -43,6 +52,9 @@ A mod where the ship and the storage closet is cleaned up when you press the ass
 - Keybinds
 	- Now handled in-game by using InputUtils
 - Ship Cleanup Configurations
+	- UseOnlyTerminal
+		- If [Enabled], the cleanup keybinding system will not respond to keypresses and only the terminal can be used to activate the mods cleanup functions.
+		
 	- ItemGrouping
 		- Whether to group the items in tight clusters or to spread them out by value
 		- Options
@@ -139,6 +151,9 @@ A mod where the ship and the storage closet is cleaned up when you press the ass
 		- Format is:
 			- "Shotgun(clone),posx,posy,posz,ammo_count"
 # Changes
+- V4.0.4
+	- Added terminal command option. (Thanks to [jcsnider](https://github.com/jcsnider) for the suggestion)
+	- See [UseOnlyTerminal] configuration setting to disable keybinds and use only the terminal for cleanup
 - V4.0.3
 	- Added shotgun organization by ammo capacity. (Thanks to [jcsnider](https://github.com/jcsnider) for the suggestion)
 	- See new configuration options [OrganizeShotgunByAmmo] and [ShotgunPlacementOverrideLocation]

@@ -1,4 +1,7 @@
 # Changes
+- V4.0.4
+	- Added terminal command option. (Thanks to [jcsnider](https://github.com/jcsnider) for the suggestion)
+	- See [UseOnlyTerminal] configuration setting to disable keybinds and use only the terminal for cleanup
 - V4.0.3
 	- Added shotgun organization by ammo capacity. (Thanks to [jcsnider](https://github.com/jcsnider) for the suggestion)
 	- See new configuration options [OrganizeShotgunByAmmo] and [ShotgunPlacementOverrideLocation]

@@ -5,16 +5,25 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+using static UnityEngine.InputForUI.CommandEvent;
 
 namespace ShipMaid.Patchers
 {
+	// Inspired by TerminalApi Mod
 	public static class ShipMaidTerminalCommands
 	{
 		public static string PerformCleanup()
 		{
 			ShipMaid.Log("Perform Cleanup Called from terminal");
 			LootOrganizingFunctions.OrganizeShipLoot();
-			return "Cleaning Ship";
+			return "Cleaning Ship\n\n";
+		}
+
+		public static string PerformStorageClosetCleanup()
+		{
+			ShipMaid.Log("Perform Storage Cleanup Called from terminal");
+			LootOrganizingFunctions.OrganizeStorageCloset();
+			return "Cleaning Storage\n\n";
 		}
 	}
 
@@ -74,7 +83,25 @@ namespace ShipMaid.Patchers
 	[HarmonyPatch(typeof(Terminal))]
 	internal class TerminalPatcher
 	{
-		public static List<CommandInfo> Commands = new List<CommandInfo>();
+		public static List<CommandInfo> Commands = new(){
+			new()
+			{
+				Title = "cleanup",
+				Category = "ShipMaid",
+				TriggerNode = TerminalExtensions.CreateTerminalNode("cleanup", true),
+				Description = "Ship Maid Ship Cleanup",
+				DisplayTextSupplier = ShipMaidTerminalCommands.PerformCleanup,
+			},
+			new()
+			{
+				Title = "cleanup storage",
+				Category = "ShipMaid",
+				TriggerNode = TerminalExtensions.CreateTerminalNode("cleanup storage", true),
+				Description = "Ship Maid Storage Cleanup",
+				DisplayTextSupplier = ShipMaidTerminalCommands.PerformStorageClosetCleanup,
+			},
+			};
+
 		public static Terminal Terminal;
 
 		[HarmonyPatch("Awake")]
@@ -83,28 +110,11 @@ namespace ShipMaid.Patchers
 		{
 			Terminal = __instance;
 
-			ShipMaid.Log($"Terminal has awoke");
-			TerminalNode triggerNode = TerminalExtensions.CreateTerminalNode("cleanup", true);
-			var keyword = TerminalExtensions.CreateTerminalKeyword("cleanup", false, triggerNode);
-			Commands.Add(new()
+			ShipMaid.Log($"Adding Terminal Commands");
+			foreach (var command in Commands)
 			{
-				Title = "cleanup",
-				Category = "ShipMaid",
-				TriggerNode = triggerNode,
-				Description = "Ship Maid Cleanup",
-				DisplayTextSupplier = ShipMaidTerminalCommands.PerformCleanup,
-			});
-			Terminal.terminalNodes.allKeywords = Terminal.terminalNodes.allKeywords.Add(keyword);
-			//if (TerminalApi.QueuedDelayedActions.Count > 0)
-			//{
-			//	TerminalApi.plugin.Log?.LogMessage($"In game, applying any changes now.");
-			//	foreach (IDelayedAction delayedAction in TerminalApi.QueuedDelayedActions)
-			//	{
-			//		delayedAction.Run();
-			//	}
-			//	TerminalApi.QueuedDelayedActions.Clear();
-			//}
-			//TerminalAwake?.Invoke((object)__instance, new() { Terminal = __instance });
+				Terminal.terminalNodes.allKeywords = Terminal.terminalNodes.allKeywords.Add(TerminalExtensions.CreateTerminalKeyword(command.Title, false, command.TriggerNode));
+			}
 		}
 
 		[HarmonyPatch("BeginUsingTerminal")]
@@ -129,7 +139,7 @@ namespace ShipMaid.Patchers
 				currentInputText = newText.Substring(newText.Length - __instance.textAdded);
 			}
 
-			ShipMaid.Log($"{currentInputText}");
+			//ShipMaid.Log($"{currentInputText}");
 		}
 
 		[HarmonyPatch("ParsePlayerSentence")]
@@ -145,7 +155,7 @@ namespace ShipMaid.Patchers
 			}
 
 			string submittedText = __instance.screenText.text.Substring(__instance.screenText.text.Length - __instance.textAdded);
-			ShipMaid.Log($"Submitted Text - {submittedText}");
+			//ShipMaid.Log($"Submitted Text - {submittedText}");
 		}
 	}
 }
