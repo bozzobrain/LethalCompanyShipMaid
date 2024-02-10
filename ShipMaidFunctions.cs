@@ -26,6 +26,12 @@ namespace ShipMaid
 			GrabbableObject obj = GetCurrentlyHeldObject();
 			if (obj != null)
 			{
+				string friendlyObjectName = obj.name;
+				if (friendlyObjectName.Contains("(Clone)"))
+				{
+					friendlyObjectName = friendlyObjectName.Substring(0, friendlyObjectName.IndexOf("(Clone)"));
+				}
+				HUDManager.Instance.DisplayGlobalNotification($"Setting object location for {friendlyObjectName}");
 				Vector3 goPos = obj.gameObject.transform.position;
 				if (obj is ShotgunItem shotgun && GrabbablesPositionsShotgun.Where(o => o.objName == obj.name && shotgun.shellsLoaded == o.AmmoQuantity).Any())
 				{

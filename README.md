@@ -151,6 +151,8 @@ A mod where the ship and the storage closet is cleaned up when you press the ass
 		- Format is:
 			- "Shotgun(clone),posx,posy,posz,ammo_count"
 # Changes
+- V4.0.6
+	- Added GUI message when object location override is set by keypress
 - V4.0.5
 	- WARNING: You may want to backup your config prior to launching this version of the app as config settings have changed.
 	- Changed configuration settings to use bool instead of string for binary configuration settings [On/Off] 
