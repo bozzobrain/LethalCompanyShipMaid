@@ -67,7 +67,13 @@ namespace ShipMaid
 
 		private static void OnShipMaidClosetCleanupCalled(CallbackContext context)
 		{
-			if ((Object)(object)localPlayerController == null || !localPlayerController.isPlayerControlled || localPlayerController.isTypingChat || localPlayerController.inTerminalMenu || localPlayerController.IsServer && !localPlayerController.isHostPlayerObject || ConfigSettings.UseOnlyTerminal.Key.Value == "Enabled")
+			if ((Object)(object)localPlayerController == null
+				|| !localPlayerController.isPlayerControlled
+				|| localPlayerController.isTypingChat
+				|| localPlayerController.inTerminalMenu
+				|| localPlayerController.IsServer
+				&& !localPlayerController.isHostPlayerObject
+				|| ConfigSettings.UseOnlyTerminal.Key.Value)
 			{
 				return;
 			}
@@ -84,7 +90,12 @@ namespace ShipMaid
 
 		private static void OnShipMaidDropAndSetObjectTypePositionCalled(CallbackContext context)
 		{
-			if ((Object)(object)localPlayerController == null || !localPlayerController.isPlayerControlled || localPlayerController.isTypingChat || localPlayerController.inTerminalMenu || localPlayerController.IsServer && !localPlayerController.isHostPlayerObject)
+			if ((Object)(object)localPlayerController == null
+				|| !localPlayerController.isPlayerControlled
+				|| localPlayerController.isTypingChat
+				|| localPlayerController.inTerminalMenu
+				|| localPlayerController.IsServer
+				&& !localPlayerController.isHostPlayerObject)
 			{
 				return;
 			}
@@ -95,7 +106,13 @@ namespace ShipMaid
 
 		private static void OnShipMaidShipCleanupCalled(CallbackContext context)
 		{
-			if ((Object)(object)localPlayerController == null || !localPlayerController.isPlayerControlled || localPlayerController.isTypingChat || localPlayerController.inTerminalMenu || localPlayerController.IsServer && !localPlayerController.isHostPlayerObject || ConfigSettings.UseOnlyTerminal.Key.Value == "Enabled")
+			if ((Object)(object)localPlayerController == null
+				|| !localPlayerController.isPlayerControlled
+				|| localPlayerController.isTypingChat
+				|| localPlayerController.inTerminalMenu
+				|| localPlayerController.IsServer
+				&& !localPlayerController.isHostPlayerObject
+				|| ConfigSettings.UseOnlyTerminal.Key.Value)
 			{
 				return;
 			}

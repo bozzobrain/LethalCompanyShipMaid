@@ -53,7 +53,7 @@ A mod where the ship and the storage closet is cleaned up when you press the ass
 	- Now handled in-game by using InputUtils
 - Ship Cleanup Configurations
 	- UseOnlyTerminal
-		- If [Enabled], the cleanup keybinding system will not respond to keypresses and only the terminal can be used to activate the mods cleanup functions.
+		- When set to [true] the cleanup keybinding system will not respond to keypresses and only the terminal can be used to activate the mods cleanup functions.
 		
 	- ItemGrouping
 		- Whether to group the items in tight clusters or to spread them out by value
@@ -95,7 +95,7 @@ A mod where the ship and the storage closet is cleaned up when you press the ass
 
 - Position Overrides
 	- UseItemTypePlacementOverrides
-		- When [Enabled] and you have pressed 'J' with an item type in a given location, all future cleanup commands will place this item type in its given location 
+		- When set to [true] and you have pressed 'J' with an item type in a given location, all future cleanup commands will place this item type in its given location 
 		- During bootup all scrap objects that are not on the storage shelve list will be candidates for definiting these location prior to you setting the item locations using 'J'
 		- Currently these candidates are not stored into the config file, you must press the keybind to store new locations into the config file to save objects locations if the plugin was not loaded before (tell me to change it if you want this feature)
 
@@ -109,7 +109,7 @@ A mod where the ship and the storage closet is cleaned up when you press the ass
 			- "itemname(Clone),posx,posy,posz,itemname2(Clone),posx,posy,posz"
 		
 	- UseTwoHandedPlacementOverrides
-		- When [Enabled] and you have pressed 'J' with a one handed item in a given location, all future cleanup commands will place all one handed items in its the given location 
+		- When set to [true] and you have pressed 'J' with a one handed item in a given location, all future cleanup commands will place all one handed items in its the given location 
 		- During bootup all two handed objects that are not on the storage shelve list will be candidates for definiting this location prior to you setting the item locations using 'J'
 		- Currently these candidates are not stored into the config file, you must press the keybind to store new locations into the config file to save objects locations if the plugin was not loaded before (tell me to change it if you want this feature)
 
@@ -120,7 +120,7 @@ A mod where the ship and the storage closet is cleaned up when you press the ass
 			- "posx,posy,posz"
 	
 	- UseOneHandedPlacementOverrides
-		- When [Enabled] and you have pressed 'J' with a two handed item in a given location, all future cleanup commands will place all two handed items in its the given location 
+		- When set to [true] and you have pressed 'J' with a two handed item in a given location, all future cleanup commands will place all two handed items in its the given location 
 		- During bootup all one handed objects that are not on the storage shelve list will be candidates for definiting this location prior to you setting the item locations using 'J'
 		- Currently these candidates are not stored into the config file, you must press the keybind to store new locations into the config file to save objects locations if the plugin was not loaded before (tell me to change it if you want this feature)
 		
@@ -142,7 +142,7 @@ A mod where the ship and the storage closet is cleaned up when you press the ass
 			- "###.#"
 - Shotgun Position Override
 	- OrganizeShotgunByAmmo
-		- When [Enabled] and you have pressed 'J' with a shotgun of a given ammo count in a given location, all future cleanup commands will place this item type in its given location (stored in config file)
+		- When set to [true] and you have pressed 'J' with a shotgun of a given ammo count in a given location, all future cleanup commands will place this item type in its given location (stored in config file)
 		- You can set a location for shotguns with 0 shells loaded, 1 shell and 2 and they will be organized in a pile with other shotguns of the same ammo
 
 	- ShotgunPlacementOverrideLocation
@@ -151,6 +151,9 @@ A mod where the ship and the storage closet is cleaned up when you press the ass
 		- Format is:
 			- "Shotgun(clone),posx,posy,posz,ammo_count"
 # Changes
+- V4.0.5
+	- WARNING: You may want to backup your config prior to launching this version of the app as config settings have changed.
+	- Changed configuration settings to use bool instead of string for binary configuration settings [On/Off] 
 - V4.0.4
 	- Added terminal command option. (Thanks to [UmaLPZ](https://github.com/UmaLPZ) for the suggestion)
 	- See [UseOnlyTerminal] configuration setting to disable keybinds and use only the terminal for cleanup
@@ -226,7 +229,8 @@ A mod where the ship and the storage closet is cleaned up when you press the ass
 1. Install BepInEx
 2. Run game once with BepInEx installed to generate folders/files
 3. Drop the DLL inside of the BepInEx/plugins folder
-4. No further steps needed
+4. Download LethalCompanyInputUtils ([github](https://github.com/Rune580/LethalCompanyInputUtils)/[Thunderstore](https://thunderstore.io/c/lethal-company/p/Rune580/LethalCompany_InputUtils/)) and drop the DLL inside of the BepInEx/plugins folder 
+5. No further steps needed
 
 # Feedback
 - Feel free to leave feedback or requests at [my github](https://github.com/bozzobrain/LethalCompanyShipMaid).

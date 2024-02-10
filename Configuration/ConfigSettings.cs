@@ -1,5 +1,6 @@
 ﻿using BepInEx.Configuration;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 
 namespace ShipMaid.Configuration
@@ -64,12 +65,12 @@ namespace ShipMaid.Configuration
 			SettingDescription = "Choose organization method, spread items of a type by [Value] or [Stack] perfectly by item type.",
 		};
 
-		public static ConfigSetupString OrganizeShotgunByAmmo = new ConfigSetupString()
+		public static ConfigSetupBool OrganizeShotgunByAmmo = new ConfigSetupBool()
 		{
 			pluginName = "ShipMaid",
 			SettingName = "OrganizeShotgunByAmmo",
-			SettingValue = "Disabled",
-			SettingDescription = "If [Enabled], setting position overrides on shotguns will permit them to be organized by how much ammo is loaded",
+			SettingValue = false,
+			SettingDescription = "If [true], setting position overrides on shotguns will permit them to be organized by how much ammo is loaded",
 		};
 
 		public static ConfigSetupShotgunPositions ShotgunPlacementOverrideLocation = new()
@@ -104,41 +105,42 @@ namespace ShipMaid.Configuration
 			SettingDescription = "Vector3 location of the Two-handed item location (if UseTwoHandedPlacementOverrides is enabled)",
 		};
 
-		public static ConfigSetupString UseItemTypePlacementOverrides = new ConfigSetupString()
+		public static ConfigSetupBool UseItemTypePlacementOverrides = new ConfigSetupBool()
 		{
 			pluginName = "ShipMaid",
 			SettingName = "UseItemTypePlacementOverrides",
-			SettingValue = "Disabled",
-			SettingDescription = "If [Enabled], pressing J (or what ever keybind from SetObjectTypePositionKey) will set an objects item type location for organization",
+			SettingValue = false,
+			SettingDescription = "If [true], pressing J (or what ever keybind from SetObjectTypePositionKey) will set an objects item type location for organization",
 		};
 
-		public static ConfigSetupString UseOneHandedPlacementOverrides = new ConfigSetupString()
+		public static ConfigSetupBool UseOneHandedPlacementOverrides = new ConfigSetupBool()
 		{
 			pluginName = "ShipMaid",
 			SettingName = "UseOneHandedPlacementOverrides",
-			SettingValue = "Disabled",
-			SettingDescription = "If [Enabled], pressing J (or what ever keybind from SetObjectTypePositionKey) with a one handed object will set all one handed objects location for organization",
+			SettingValue = false,
+			SettingDescription = "If [true], pressing J (or what ever keybind from SetObjectTypePositionKey) with a one handed object will set all one handed objects location for organization",
 		};
 
-		public static ConfigSetupString UseOnlyTerminal = new ConfigSetupString()
+		public static ConfigSetupBool UseOnlyTerminal = new ConfigSetupBool()
 		{
 			pluginName = "ShipMaid",
 			SettingName = "UseOnlyTerminal",
-			SettingValue = "Disabled",
-			SettingDescription = "If [Enabled], the keybinding will be disabled and only the terminal will be used for cleanup commands",
+			SettingValue = false,
+			SettingDescription = "If [true], the keybinding will be disabled and only the terminal will be used for cleanup commands",
 		};
 
-		public static ConfigSetupString UseTwoHandedPlacementOverrides = new ConfigSetupString()
+		public static ConfigSetupBool UseTwoHandedPlacementOverrides = new ConfigSetupBool()
 		{
 			pluginName = "ShipMaid",
 			SettingName = "UseTwoHandedPlacementOverrides",
-			SettingValue = "Disabled",
-			SettingDescription = "If [Enabled], pressing J (or what ever keybind from SetObjectTypePositionKey) with a two handed object will set all two handed objects location for organization",
+			SettingValue = false,
+			SettingDescription = "If [true], pressing J (or what ever keybind from SetObjectTypePositionKey) with a two handed object will set all two handed objects location for organization",
 		};
 
 		public static void BindConfigSettings()
 		{
 			ShipMaid.Log("BindingConfigs");
+			MaybeMigrateConfigFile();
 			currentConfigEntries = UseOnlyTerminal.Bind(currentConfigEntries);
 			currentConfigEntries = OrganizationTechnique.Bind(currentConfigEntries);
 			currentConfigEntries = TwoHandedItemLocation.Bind(currentConfigEntries);
@@ -155,21 +157,14 @@ namespace ShipMaid.Configuration
 			currentConfigEntries = ItemPlacementOverrideOffsetRotation.Bind(currentConfigEntries);
 			currentConfigEntries = OrganizeShotgunByAmmo.Bind(currentConfigEntries);
 			currentConfigEntries = ShotgunPlacementOverrideLocation.Bind(currentConfigEntries);
-
 			TryRemoveOldConfigSettings();
 		}
 
-		public static void TryRemoveOldConfigSettings()
+		public static void MaybeMigrateConfigFile()
 		{
-			HashSet<string> hashSet = new HashSet<string>();
-			HashSet<string> hashSet2 = new HashSet<string>();
-			foreach (ConfigEntryBase value in currentConfigEntries.Values)
-			{
-				hashSet.Add(value.Definition.Section);
-				hashSet2.Add(value.Definition.Key);
-			}
 			try
 			{
+				// Check for file present
 				//ShipMaid.Log("Cleaning old config entries");
 				ConfigFile config = ShipMaid.instance.Config;
 				string configFilePath = config.ConfigFilePath;
@@ -177,69 +172,131 @@ namespace ShipMaid.Configuration
 				{
 					return;
 				}
-				string text = File.ReadAllText(configFilePath);
-				string[] array = File.ReadAllLines(configFilePath);
-				string text2 = "";
-				for (int i = 0; i < array.Length; i++)
+
+				// Read file into string and array
+				string configFileText = "";
+				string[] configFileLines = File.ReadAllLines(configFilePath);
+				int linesInFile = configFileLines.Length;
+				for (int i = 0; i < configFileLines.Length; i++)
 				{
-					array[i] = array[i].Replace("\n", "");
-					if (array[i].Length <= 0)
+					if (configFileLines[i].Contains(" Enabled") || configFileLines[i].Contains(" Disabled"))
+					{
+						ShipMaid.Log($"Found line to replace {configFileLines[i]}");
+						configFileLines[i] = configFileLines[i].Replace("Enabled", "true");
+						configFileLines[i] = configFileLines[i].Replace("Disabled", "false");
+						if (i > 2 && configFileLines[i - 2].Contains("String"))
+						{
+							configFileLines[i - 2] = configFileLines[i - 2].Replace("String", "Boolean");
+						}
+						ShipMaid.Log($"Changed string to {configFileLines[i]}");
+					}
+				}
+				for (int i = 0; i < configFileLines.Length; i++)
+				{
+					configFileText += configFileLines[i] + "\n";
+				}
+
+				File.WriteAllText("debug.txt", configFileText);
+				File.WriteAllText(configFilePath, configFileText);
+				config.Reload();
+			}
+			catch
+			{
+			}
+		}
+
+		public static void TryRemoveOldConfigSettings()
+		{
+			HashSet<string> sectionsHashSet = new HashSet<string>();
+			HashSet<string> keysHashSet = new HashSet<string>();
+			// Add all config settings to hash sets
+			foreach (ConfigEntryBase value in currentConfigEntries.Values)
+			{
+				sectionsHashSet.Add(value.Definition.Section);
+				keysHashSet.Add(value.Definition.Key);
+			}
+
+			// Try file modifications
+			try
+			{
+				// Check for file present
+				//ShipMaid.Log("Cleaning old config entries");
+				ConfigFile config = ShipMaid.instance.Config;
+				string configFilePath = config.ConfigFilePath;
+				if (!File.Exists(configFilePath))
+				{
+					return;
+				}
+
+				// Read file into string and array
+				string configFileText = File.ReadAllText(configFilePath);
+				string[] configFileLines = File.ReadAllLines(configFilePath);
+				string sectionTextFromFile = "";
+				for (int i = 0; i < configFileLines.Length; i++)
+				{
+					configFileLines[i] = configFileLines[i].Replace("\n", "");
+					if (configFileLines[i].Length <= 0)
 					{
 						continue;
 					}
-					if (array[i].StartsWith("["))
+					// THIS IS A SECTION
+					if (configFileLines[i].StartsWith("["))
 					{
-						if (text2 != "" && !hashSet.Contains(text2))
+						// If the parsed section in the file is not in the code settings (remove it)
+						if (sectionTextFromFile != "" && !sectionsHashSet.Contains(sectionTextFromFile))
 						{
-							text2 = "[" + text2 + "]";
-							int num = text.IndexOf(text2);
-							int num2 = text.IndexOf(array[i]);
-							text = text.Remove(num, num2 - num);
+							sectionTextFromFile = "[" + sectionTextFromFile + "]";
+							int num = configFileText.IndexOf(sectionTextFromFile);
+							int num2 = configFileText.IndexOf(configFileLines[i]);
+							configFileText = configFileText.Remove(num, num2 - num);
 						}
-						text2 = array[i].Replace("[", "").Replace("]", "").Trim();
+						// Remove the section braces and store line
+						sectionTextFromFile = configFileLines[i].Replace("[", "").Replace("]", "").Trim();
 					}
 					else
 					{
-						if (!(text2 != ""))
+						if (!(sectionTextFromFile != ""))
 						{
 							continue;
 						}
-						if (i <= array.Length - 4 && array[i].StartsWith("##"))
+						// This is a config setting description - Starts a new config entry
+						if (i <= configFileLines.Length - 4 && configFileLines[i].StartsWith("##"))
 						{
 							int j;
-							for (j = 1; i + j < array.Length && array[i + j].Length > 3; j++)
+							for (j = 1; i + j < configFileLines.Length && configFileLines[i + j].Length > 3; j++)
 							{
 							}
-							if (hashSet.Contains(text2))
+							if (sectionsHashSet.Contains(sectionTextFromFile))
 							{
-								int num3 = array[i + j - 1].IndexOf("=");
-								string item = array[i + j - 1].Substring(0, num3 - 1);
-								if (!hashSet2.Contains(item))
+								int num3 = configFileLines[i + j - 1].IndexOf("=");
+								string item = configFileLines[i + j - 1].Substring(0, num3 - 1);
+								if (!keysHashSet.Contains(item))
 								{
-									int num4 = text.IndexOf(array[i]);
-									int num5 = text.IndexOf(array[i + j - 1]) + array[i + j - 1].Length;
-									text = text.Remove(num4, num5 - num4);
+									int num4 = configFileText.IndexOf(configFileLines[i]);
+									int num5 = configFileText.IndexOf(configFileLines[i + j - 1]) + configFileLines[i + j - 1].Length;
+									configFileText = configFileText.Remove(num4, num5 - num4);
 								}
 							}
 							i += j - 1;
 						}
-						else if (array[i].Length > 3)
+						else if (configFileLines[i].Length > 3)
 						{
-							text = text.Replace(array[i], "");
+							configFileText = configFileText.Replace(configFileLines[i], "");
 						}
 					}
 				}
-				if (!hashSet.Contains(text2))
+				// Found a section in the config file that isnt in the config settings (remove it)
+				if (!sectionsHashSet.Contains(sectionTextFromFile))
 				{
-					text2 = "[" + text2 + "]";
-					int num6 = text.IndexOf(text2);
-					text = text.Remove(num6, text.Length - num6);
+					sectionTextFromFile = "[" + sectionTextFromFile + "]";
+					int num6 = configFileText.IndexOf(sectionTextFromFile);
+					configFileText = configFileText.Remove(num6, configFileText.Length - num6);
 				}
-				while (text.Contains("\n\n\n"))
+				while (configFileText.Contains("\n\n\n"))
 				{
-					text = text.Replace("\n\n\n", "\n\n");
+					configFileText = configFileText.Replace("\n\n\n", "\n\n");
 				}
-				File.WriteAllText(configFilePath, text);
+				File.WriteAllText(configFilePath, configFileText);
 				config.Reload();
 			}
 			catch

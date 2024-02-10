@@ -1,6 +1,6 @@
 {
   "name": "ShipMaid",
-  "version_number": "4.0.4",
+  "version_number": "4.0.5",
   "website_url": "https://github.com/bozzobrain/LethalCompanyShipMaid/releases",
   "description": "On keypress or terminal command, within the ship, items in the ship or closet will be organized.",
   "dependencies": [

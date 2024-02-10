@@ -174,7 +174,10 @@ namespace ShipMaid.HelperFunctions
 					List<float> offsetLocations = new List<float>();
 
 					// if stacking move the stacks around a bit to separate piles
-					if (ConfigSettings.OrganizationTechnique.Key.Value == "Stack" && ConfigSettings.UseItemTypePlacementOverrides.Key.Value != "Enabled" && ConfigSettings.UseOneHandedPlacementOverrides.Key.Value != "Enabled" && ConfigSettings.UseTwoHandedPlacementOverrides.Key.Value != "Enabled")
+					if (ConfigSettings.OrganizationTechnique.Key.Value == "Stack"
+						&& !ConfigSettings.UseItemTypePlacementOverrides.Key.Value
+						&& !ConfigSettings.UseOneHandedPlacementOverrides.Key.Value
+						&& !ConfigSettings.UseTwoHandedPlacementOverrides.Key.Value)
 					{
 						System.Random r = new();
 						xPositionOffset = (float)r.NextDouble() * r.Next(-1, 2);
@@ -187,17 +190,25 @@ namespace ShipMaid.HelperFunctions
 					Vector3 placementPosition;
 
 					// Handle all object override locations
-					if (ShipMaidFunctions.GetObjectPositionTarget(firstObjectOfType) is GrabbableObjectPositionHelper goph && goph != null && ConfigSettings.UseItemTypePlacementOverrides.Key.Value == "Enabled")
+					if (ShipMaidFunctions.GetObjectPositionTarget(firstObjectOfType) is GrabbableObjectPositionHelper goph
+						&& goph != null
+						&& ConfigSettings.UseItemTypePlacementOverrides.Key.Value)
 					{
 						ShipMaid.Log($"Setting position from memory for {firstObjectOfType.name}");
 						placementPosition = goph.PlacementPosition;
 					}
-					else if (ShipMaidFunctions.GetTwoHandedPositionTarget() is Vector3 goph_TwoHanded && goph_TwoHanded != null && ConfigSettings.UseTwoHandedPlacementOverrides.Key.Value == "Enabled" && twoHanded)
+					else if (ShipMaidFunctions.GetTwoHandedPositionTarget() is Vector3 goph_TwoHanded
+						&& goph_TwoHanded != null
+						&& ConfigSettings.UseTwoHandedPlacementOverrides.Key.Value
+						&& twoHanded)
 					{
 						ShipMaid.Log($"Setting Two Handed position from memory for {firstObjectOfType.name} - {goph_TwoHanded.x},{goph_TwoHanded.y},{goph_TwoHanded.z}");
 						placementPosition = goph_TwoHanded;
 					}
-					else if (ShipMaidFunctions.GetOneHandedPositionTarget() is Vector3 goph_OneHanded && goph_OneHanded != null && ConfigSettings.UseOneHandedPlacementOverrides.Key.Value == "Enabled" && !twoHanded)
+					else if (ShipMaidFunctions.GetOneHandedPositionTarget() is Vector3 goph_OneHanded
+						&& goph_OneHanded != null
+						&& ConfigSettings.UseOneHandedPlacementOverrides.Key.Value
+						&& !twoHanded)
 					{
 						ShipMaid.Log($"Setting One Handed position from memory for {firstObjectOfType.name} - {goph_OneHanded.x},{goph_OneHanded.y},{goph_OneHanded.z}");
 						placementPosition = goph_OneHanded;
@@ -238,7 +249,10 @@ namespace ShipMaid.HelperFunctions
 							ShipMaid.LogError("Item is Shotgun and target retrieved");
 						}
 						// Override placement if object is shotgun and shotgun override is enabled
-						if (obj is ShotgunItem shotgun && ShipMaidFunctions.GetObjectPositionTargetShotgun(shotgun) is GrabbableObjectPositionHelperShotgun goph_shotgun && goph_shotgun != null && ConfigSettings.OrganizeShotgunByAmmo.Key.Value == "Enabled")
+						if (obj is ShotgunItem shotgun
+							&& ShipMaidFunctions.GetObjectPositionTargetShotgun(shotgun) is GrabbableObjectPositionHelperShotgun goph_shotgun
+							&& goph_shotgun != null
+							&& ConfigSettings.OrganizeShotgunByAmmo.Key.Value)
 						{
 							int ammoCapacityShotgun = shotgun.shellsLoaded;
 							ShipMaid.Log($"Setting position from memory for {firstObjectOfType.name} - Ammo capacity {ammoCapacityShotgun}");
@@ -246,7 +260,10 @@ namespace ShipMaid.HelperFunctions
 						}
 
 						// Choose how to organze each item of loot
-						if (ConfigSettings.OrganizationTechnique.Key.Value == "Value" && ConfigSettings.UseItemTypePlacementOverrides.Key.Value != "Enabled" && ConfigSettings.UseOneHandedPlacementOverrides.Key.Value != "Enabled" && ConfigSettings.UseTwoHandedPlacementOverrides.Key.Value != "Enabled")
+						if (ConfigSettings.OrganizationTechnique.Key.Value == "Value"
+							&& !ConfigSettings.UseItemTypePlacementOverrides.Key.Value
+							&& !ConfigSettings.UseOneHandedPlacementOverrides.Key.Value
+							&& !ConfigSettings.UseTwoHandedPlacementOverrides.Key.Value)
 						{
 							if (targetLocationFront)
 							{
@@ -263,13 +280,19 @@ namespace ShipMaid.HelperFunctions
 							}
 							offsetLocations.Add(placementPosition.x);
 						}
-						else if (ConfigSettings.UseItemTypePlacementOverrides.Key.Value != "Enabled" && ConfigSettings.UseOneHandedPlacementOverrides.Key.Value != "Enabled" && ConfigSettings.UseTwoHandedPlacementOverrides.Key.Value != "Enabled")
+						else if (!ConfigSettings.UseItemTypePlacementOverrides.Key.Value
+							&& !ConfigSettings.UseOneHandedPlacementOverrides.Key.Value
+							&& !ConfigSettings.UseTwoHandedPlacementOverrides.Key.Value)
 						{
 							placementPosition.x += xPositionOffset;
 						}
 
 						// Adjust the object position if the override offset rotation is enabled
-						if (ConfigSettings.ItemPlacementOverrideOffsetPosition.GetVector3(ConfigSettings.ItemPlacementOverrideOffsetPosition.Key.Value, out Vector3 ItemPlacementWiggles) && (ConfigSettings.UseOneHandedPlacementOverrides.Key.Value == "Enabled" || ConfigSettings.UseTwoHandedPlacementOverrides.Key.Value == "Enabled") || ConfigSettings.UseItemTypePlacementOverrides.Key.Value == "Enabled")
+						if (ConfigSettings.ItemPlacementOverrideOffsetPosition.GetVector3(ConfigSettings.ItemPlacementOverrideOffsetPosition.Key.Value, out Vector3 ItemPlacementWiggles)
+							&&
+							(ConfigSettings.UseOneHandedPlacementOverrides.Key.Value
+							|| ConfigSettings.UseTwoHandedPlacementOverrides.Key.Value
+							|| ConfigSettings.UseItemTypePlacementOverrides.Key.Value))
 						{
 							System.Random r = new();
 							placementPosition.x += (float)r.NextDouble() * ItemPlacementWiggles.x;
@@ -279,7 +302,10 @@ namespace ShipMaid.HelperFunctions
 
 						// Adjust the object rotation if the override offset rotation is enabled
 						Quaternion objectRotation = new(obj.NetworkObject.transform.rotation.x, obj.NetworkObject.transform.rotation.y, obj.NetworkObject.transform.rotation.z, obj.NetworkObject.transform.rotation.w);
-						if (ConfigSettings.ItemPlacementOverrideOffsetRotation.GetFloat(ConfigSettings.ItemPlacementOverrideOffsetRotation.Key.Value, out float ItemPlacementRot) && (ConfigSettings.UseOneHandedPlacementOverrides.Key.Value == "Enabled" || ConfigSettings.UseTwoHandedPlacementOverrides.Key.Value == "Enabled") || ConfigSettings.UseItemTypePlacementOverrides.Key.Value == "Enabled")
+						if (ConfigSettings.ItemPlacementOverrideOffsetRotation.GetFloat(ConfigSettings.ItemPlacementOverrideOffsetRotation.Key.Value, out float ItemPlacementRot)
+							&& (ConfigSettings.UseOneHandedPlacementOverrides.Key.Value
+							|| ConfigSettings.UseTwoHandedPlacementOverrides.Key.Value
+							|| ConfigSettings.UseItemTypePlacementOverrides.Key.Value))
 						{
 							//ShipMaid.LogError($"Got config value of {ItemPlacementRot}");
 							//ShipMaid.LogError($"ItemPlacementOverrideOffsetPosition Enabled - Original {obj.name} rotation - where original rotation is {PositionHelperFunctions.DebugQuaterion(objectRotation)}");

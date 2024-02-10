@@ -142,7 +142,7 @@ namespace ShipMaid
 			List<string> ItemsForStorageCloset = ConfigSettings.ClosetLocationOverride.GetStrings(ConfigSettings.ClosetLocationOverride.Key.Value);
 			HangarShipHelper hsh = new();
 			var allItems = hsh.FindAllScrapShip();
-			if (ConfigSettings.OrganizeShotgunByAmmo.Key.Value == "Enabled")
+			if (ConfigSettings.OrganizeShotgunByAmmo.Key.Value)
 			{
 				//ShipMaid.Log("Shotgun Override - Enabled");
 				var shotgunPlacementListConfig = ConfigSettings.ShotgunPlacementOverrideLocation.GetObjectPositionList(ConfigSettings.ShotgunPlacementOverrideLocation.Key.Value);
@@ -177,7 +177,7 @@ namespace ShipMaid
 				}
 			}
 
-			if (ConfigSettings.UseItemTypePlacementOverrides.Key.Value == "Enabled")
+			if (ConfigSettings.UseItemTypePlacementOverrides.Key.Value)
 			{
 				var itemPlacementListConfig = ConfigSettings.ItemPlacementOverrideLocation.GetObjectPositionList(ConfigSettings.ItemPlacementOverrideLocation.Key.Value);
 				if (itemPlacementListConfig.Count > 0 && itemPlacementListConfig.First().objName != "name")
@@ -204,7 +204,7 @@ namespace ShipMaid
 					}
 				}
 			}
-			if (ConfigSettings.UseOneHandedPlacementOverrides.Key.Value == "Enabled")
+			if (ConfigSettings.UseOneHandedPlacementOverrides.Key.Value)
 			{
 				if (ConfigSettings.OneHandedItemPlacementOverrideLocation.GetVector3(ConfigSettings.OneHandedItemPlacementOverrideLocation.Key.Value, out Vector3 oneHandedOverrideLocation))
 				{
@@ -226,7 +226,7 @@ namespace ShipMaid
 					}
 				}
 			}
-			if (ConfigSettings.UseTwoHandedPlacementOverrides.Key.Value == "Enabled")
+			if (ConfigSettings.UseTwoHandedPlacementOverrides.Key.Value)
 			{
 				if (ConfigSettings.TwoHandedItemPlacementOverrideLocation.GetVector3(ConfigSettings.TwoHandedItemPlacementOverrideLocation.Key.Value, out Vector3 twoHandedOverrideLocation))
 				{
