@@ -242,11 +242,11 @@ namespace ShipMaid.HelperFunctions
 						}
 						if (firstObjectOfType is ShotgunItem shotgun1)
 						{
-							ShipMaid.LogError($"Item is Shotgun - {shotgun1.name}");
+							ShipMaid.Log($"Item is Shotgun - {shotgun1.name}");
 						}
 						if (firstObjectOfType is ShotgunItem shotgun2 && ShipMaidFunctions.GetObjectPositionTargetShotgun(shotgun2) is GrabbableObjectPositionHelperShotgun goph_shotgun1 && goph_shotgun1 != null)
 						{
-							ShipMaid.LogError("Item is Shotgun and target retrieved");
+							ShipMaid.Log("Item is Shotgun and target retrieved");
 						}
 						// Override placement if object is shotgun and shotgun override is enabled
 						if (obj is ShotgunItem shotgun

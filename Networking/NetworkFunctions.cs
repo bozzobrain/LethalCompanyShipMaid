@@ -1,5 +1,6 @@
 ﻿using GameNetcodeStuff;
 using HarmonyLib;
+using System.ComponentModel;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -66,10 +67,16 @@ namespace ShipMaid.Networking
 
 				if (obj.TryGet(out var networkObject))
 				{
-					GrabbableObject component = networkObject.GetComponent<GrabbableObject>();
-					if (!Keybinds.localPlayerController.IsOwner)
+					if (networkObject.TryGetComponent(out GrabbableObject component))
 					{
-						MakeObjectFall(component, placementPosition, placementRotation, shipParent);
+						if (!Keybinds.localPlayerController.IsOwner)
+						{
+							MakeObjectFall(component, placementPosition, placementRotation, shipParent);
+						}
+					}
+					else
+					{
+						ShipMaid.LogError("Failed to get grabbable object ref from network object - ClientRpc");
 					}
 				}
 			}
@@ -108,9 +115,14 @@ namespace ShipMaid.Networking
 
 				if (obj.TryGet(out var networkObject))
 				{
-					GrabbableObject component = networkObject.GetComponent<GrabbableObject>();
-
-					MakeObjectFall(component, placementPosition, placementRotation, shipParent);
+					if (networkObject.TryGetComponent(out GrabbableObject component))
+					{
+						MakeObjectFall(component, placementPosition, placementRotation, shipParent);
+					}
+					else
+					{
+						ShipMaid.LogError("Failed to get grabbable object ref from network object - ServerRpc");
+					}
 				}
 			}
 

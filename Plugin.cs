@@ -15,7 +15,7 @@ namespace ShipMaid
 		internal static InputUtilsKeybinds InputActionsInstance = new InputUtilsKeybinds();
 		private const string GUID = "ShipMaid";
 		private const string NAME = "ShipMaid";
-		private const string VERSION = "4.0.6";
+		private const string VERSION = "4.0.7";
 
 		public static void Log(string message)
 		{
