@@ -151,6 +151,8 @@ A mod where the ship and the storage closet is cleaned up when you press the ass
 		- Format is:
 			- "Shotgun(clone),posx,posy,posz,ammo_count"
 # Changes
+- V4.0.8
+	- Rebuilt with new V50 release libraries 
 - V4.0.7
 	- Added debugging to identify missing object reference issue #20
 - V4.0.6
