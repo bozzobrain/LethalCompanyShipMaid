@@ -91,7 +91,16 @@ namespace ShipMaid.HelperFunctions
 		/// <returns>Offset x value scaled by scrap value.</returns>
 		private static float GetXOffsetFromScrapValue(GrabbableObject obj, float highestScrapValue, float maxXOffset)
 		{
-			return ((obj.scrapValue - 10) / highestScrapValue) * maxXOffset;
+			// Dont break math plz
+			if (obj.scrapValue != 0 && highestScrapValue != 0)
+			{
+				return ((obj.scrapValue - 10) / highestScrapValue) * maxXOffset;
+			}
+			else
+			{
+				ShipMaid.Log($"Refraining from breaking math - HighestScrapValue {highestScrapValue} - obj.scrapValue {obj.scrapValue}");
+				return 0;
+			}
 		}
 
 		private static void OrganizeItems(StorageClosetHelper sch, List<GrabbableObject> objects, bool twoHanded)
